@@ -13,4 +13,4 @@ libwebqqpython.cpp: libwebqq.i
 	swig -c++ -python -I../../src -o $@ $<
 
 clean-local:
-	rm -f libwebqq.py  libwebqqpython.h libwebqqpython.cpp *.pyc
+	rm -f libwebqqpython.py  libwebqqpython.h libwebqqpython.cpp *.pyc
