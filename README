@@ -1,1 +1,9 @@
-This Project is based on kernelhcy's gtkqq
+This Project aims at the implementation of web qq protocol with C++
+back end and other language  extended which used swig for  high level
+wrapping.
+
+This project will be used as a build-in protocol of
+emesene (https://github.com/gtkqq/emesene) which was implemented by
+python and gtk or qt for UI. So the first milestone was to integrated
+with emesene. 
+
