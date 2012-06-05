@@ -14,9 +14,7 @@
 class Action{
 public:
     virtual void run()=0;
-    virtual ~Action(){
-
-    }
+    virtual ~Action(){}
 };
 
 class Caller {
