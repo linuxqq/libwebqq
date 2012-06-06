@@ -8,7 +8,7 @@
  * 
  */
 
-#include "qq_debug.h"
+#include "QQDebug.h"
 #include <time.h>
 #include <stdio.h>
 #include <stdarg.h>

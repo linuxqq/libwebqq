@@ -11,7 +11,7 @@
 #include "HttpClient.h"
 #include <iostream>
 #include <string>
-#include "qq_debug.h"
+#include "QQDebug.h"
 #include <vector>
 #include <sstream>
 #include <curlpp/cURLpp.hpp>

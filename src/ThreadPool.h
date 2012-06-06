@@ -13,7 +13,6 @@
 
 #include <iostream>
 #include <list>
-
 #include "Thread.h"
 
 namespace ThreadPool
@@ -33,9 +32,7 @@ namespace ThreadPool
         {
         protected:
             const int  _job_no;
-
             TMutex     _sync_mutex;
-
 
         public:
             TJob ( const int  n = NO_PROC )
@@ -51,11 +48,8 @@ namespace ThreadPool
             virtual void run ( void * ptr ) = 0;
 
             int  job_no () const { return _job_no; }
-
             void lock   () { _sync_mutex.lock(); }
-
             void unlock () { _sync_mutex.unlock(); }
-
             bool on_proc ( const int  p ) const
             {
                 return ((p == NO_PROC) || (_job_no == NO_PROC) || (p == _job_no));
@@ -64,13 +58,9 @@ namespace ThreadPool
 
     protected:
         unsigned int             _max_parallel;
-
         TPoolThr **              _threads;
-
         std::list< TPoolThr * >  _idle_threads;
-
         TCondition               _idle_cond;
-
 
     public:
         TPool ( const unsigned int  max_p );

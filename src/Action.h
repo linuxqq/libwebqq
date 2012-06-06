@@ -11,7 +11,10 @@
 #ifndef __ACTION_H__
 #define __ACTION_H__
 
-class Action{
+
+
+class Action
+{
 public:
     virtual void run()=0;
     virtual ~Action(){}
@@ -25,7 +28,7 @@ public:
     ~Caller() { delAction(); }
     void delAction() { delete _callback; _callback = 0; }
     void setAction(Action *cb) { delAction(); _callback = cb; }
-    void call() { if (_callback)  _callback->run(); }
+    void call() { if (_callback)  _callback -> run() ;}
 };
 
 #endif

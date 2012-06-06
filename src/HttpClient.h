@@ -14,6 +14,7 @@
 #include <vector>
 #include <list>
 #include "Singleton.h"
+
 #include <cstring>
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Easy.hpp>
