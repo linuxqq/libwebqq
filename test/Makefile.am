@@ -2,7 +2,7 @@ noinst_PROGRAMS=testhttpclient testmd5 testjsoncpp testthreadpool
 
 testhttpclient_SOURCES=testhttpclient.cpp
 
-testmd5_SOURCES=testmd5.c
+testmd5_SOURCES=testmd5.cpp
 
 testthreadpool_SOURCES=testthreadpool.cpp
 
