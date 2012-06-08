@@ -85,6 +85,7 @@ std::vector<std::string> & Cookie::splitCookieStr(const std::string &str, std::v
 HttpClient::HttpClient():request(NULL)
 {
     cookies.clear();
+    //request = new curlpp::Easy();
 }
 
 HttpClient::~HttpClient()
@@ -102,21 +103,29 @@ void HttpClient::perform()
     try
     {
         curlpp::Cleanup myCleanup;
+        request->setOpt(new curlpp::options::Verbose(true));
         if ( request)
         {
-            for (std::list<std::string>::iterator it = cookies.begin();
-                 it != cookies.end();  ++it)
+            if ( !cookies.empty())
             {
-                request->setOpt(curlpp::options::CookieList(*it));
+                for (std::list<std::string>::iterator it = cookies.begin();
+                     it != cookies.end();  ++it)
+                {
+                    request->setOpt(curlpp::options::CookieList(*it));
+                }
             }
-            request->perform();
+            else{
+                request->setOpt(curlpp::options::CookieList(""));
+            }
         }
         else {
             std::cerr<<"Invalid Http Client"<<std::endl;
         }
 
+        request->perform();
         cookies.clear();
         curlpp::infos::CookieList::get(*request, cookies);
+
     }
     catch(curlpp::RuntimeError & e)
     {
@@ -170,4 +179,20 @@ std::string HttpClient::requestServer(const std::string & uri, const std::string
         std::cout << e.what() << std::endl;
     }
 
+}
+
+bool HttpClient::getValueFromCookie( const std::string &key, std::string &value)
+{
+    for (std::list<std::string>::iterator it = cookies.begin();
+         it != cookies.end();  ++it)
+    {
+        Cookie cookie = Cookie(*it);
+        std::cout<<cookie<<std::endl;
+        if ( cookie.name == key)
+        {
+            value =cookie.value;
+            return true;
+        }
+    }
+    return false;
 }

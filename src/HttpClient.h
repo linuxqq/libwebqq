@@ -125,12 +125,12 @@ public:
 
     HttpClient();
     ~HttpClient();
+
     void setOptions(std::vector<curlpp::OptionBase *> options) throw(curlpp::RuntimeError);
 
     bool  getValueFromCookie(const std::string  & key , std::string & value);
 
     std::string requestServer( const std::string & uri, const std::string body ="");
-
 
 private:
 

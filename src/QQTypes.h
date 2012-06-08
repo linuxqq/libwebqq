@@ -12,7 +12,7 @@
 #define INCLUDED_QQTYPES_H
 #include <string>
 #include <list>
-
+#include "Singleton.h"
 enum  Event{
     ON_RECEIVE_MESSAGE = 512,
     ON_SEND_MESSAGE,
@@ -120,6 +120,22 @@ struct QQCategory{
     std::list<QQBuddy *> members;
 };
 
+struct QQConfig:public Singleton<QQConfig>
+{
+    friend class Singleton<QQConfig>;
+    bool use_proxy;
+    std::string proxy_type;
+    std::string proxy_host;
+    std::string proxy_port;
+    std::string proxy_account;
+    std::string proxy_passcode;
+
+    QQConfig(){
+        use_proxy = false;
+    }
+private:
+    void reset(){}
+};
 
 #endif /* INCLUDED_QQTYPES_H */
 
