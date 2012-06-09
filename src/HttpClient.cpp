@@ -16,7 +16,7 @@
 #include <sstream>
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Easy.hpp>
-
+#include "QQDebug.h"
 #define CURLPP_ALLOW_NOT_AVAILABLE
 
 #include <curlpp/Infos.hpp>
@@ -48,14 +48,14 @@ std::ostream & operator<<(std::ostream &strm, const Cookie &cook)
 Cookie :: Cookie(const std::string &str_cookie)
 {
 	std::vector<std::string> vC = this->splitCookieStr(str_cookie);
-
 	domain = vC[0];
 	tail = vC[1] == "TRUE";
 	path = vC[2];
 	secure = vC[3] == "TRUE";
 	expires = StrToInt(vC[4]);
 	name = vC[5];
-	value = vC[6];
+	if ( vC.size()> 6 )
+		value = vC[6];
 }
 
 std::vector<std::string> & Cookie::split_cookie_str(const std::string &str, std::vector<std::string> &in)
@@ -98,6 +98,12 @@ void HttpClient::setOptions(std::vector<curlpp::OptionBase *> options) throw(cur
     request->setOpt(options.begin(), options.end());
 }
 
+void HttpClient::addCookies(std::list<std::string> cookies)
+{
+
+    (this->cookies).insert(this->cookies.end(), cookies.begin(),cookies.end());
+
+}
 void HttpClient::perform()
 {
     try
@@ -143,7 +149,7 @@ void HttpClient::reset()
     //request -> setOpt(new curlpp::options::Verbose(true));
 }
 
-std::string HttpClient::requestServer(const std::string & uri, const std::string body)
+std::string HttpClient::requestServer(const std::string & uri, const std::string body )
 {
     try{
 
@@ -151,15 +157,19 @@ std::string HttpClient::requestServer(const std::string & uri, const std::string
 
         if ( request)
         {
+	    debug_info("Uri:%s", uri.c_str());
             request->setOpt( new curlpp::options::Url(uri));
         }
 
         if ( body != std::string(""))
         {
-            std::istringstream myStream(body);
-            request->setOpt(new curlpp::options::ReadStream(&myStream));
-            request->setOpt(new curlpp::options::InfileSize(body.size()));
-            request->setOpt(new curlpp::options::Upload(true));
+	    std::cout<<body<<std::endl;
+	    request->setOpt(new curlpp::options::PostFields(body));
+	    request->setOpt(new curlpp::options::PostFieldSize(body.size()));
+            //std::istringstream myStream(body);
+            //request->setOpt(new curlpp::options::ReadStream(&myStream));
+            //request->setOpt(new curlpp::options::InfileSize(body.size()));
+            //request->setOpt(new curlpp::options::Upload(true));
         }
         curlpp::types::WriteFunctionFunctor functor(&mWriterChunk,
                                                     &WriterMemoryClass::WriteMemoryCallback);
@@ -187,7 +197,7 @@ bool HttpClient::getValueFromCookie( const std::string &key, std::string &value)
          it != cookies.end();  ++it)
     {
         Cookie cookie = Cookie(*it);
-        std::cout<<cookie<<std::endl;
+        //std::cout<<cookie<<std::endl;
         if ( cookie.name == key)
         {
             value =cookie.value;
