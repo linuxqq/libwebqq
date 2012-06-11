@@ -9,6 +9,7 @@ libwebqq_la_SOURCES= Thread.h Thread.cpp \
 		     md5.h md5.cpp \
 		     Action.h Action.cpp\
 		     QQAuthentication.h QQAuthentication.cpp\
+		     QQUtil.h QQUtil.cpp\
    		     QQTypes.h
 
 AM_CFLAGS = -g  -Wall -Werror -D_REENTRANT  -Wall -Wno-long-long -Wshadow -Wpacked -Wundef -Wchar-subscripts  -pedantic -ansi

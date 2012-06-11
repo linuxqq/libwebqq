@@ -16,26 +16,9 @@
 #include "QQAuthentication.h"
 #include "json/json.h"
 #include "QQDebug.h"
+#include "QQUtil.h"
 using namespace std;
-void Tokenize(const string& str,
-                      vector<string>& tokens,
-                      const string& delimiters = " ")
-{
-    // Skip delimiters at beginning.
-    string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-    // Find first "non-delimiter".
-    string::size_type pos     = str.find_first_of(delimiters, lastPos);
-
-    while (string::npos != pos || string::npos != lastPos)
-    {
-        // Found a token, add it to the vector.
-        tokens.push_back(str.substr(lastPos, pos - lastPos));
-        // Skip delimiters.  Note the "not_of"
-        lastPos = str.find_first_not_of(delimiters, pos);
-        // Find next "non-delimiter"
-        pos = str.find_first_of(delimiters, lastPos);
-    }
-}
+using namespace QQUtil;
 
 int main()
 {
@@ -47,14 +30,14 @@ int main()
     std::cout<<result<<std::endl;
     size_t pos_1 = result.find("(");
     size_t pos_2 = result.find(")");
-    std::string body = result.substr(pos_1 +2, pos_2-pos_1-3);
+    std::string body = result.substr(pos_1
+                                     +2, pos_2-pos_1-3);
     std::cout<<body<<std::endl;
     std::vector<std::string > vec;
 
     Tokenize(body, vec, "\',\'");
     std::string vcode = vec[1];
     std::string uin= vec[2];
-
 
     result = Singleton<HttpClient>::getInstance()->requestServer("http://ui.ptlogin2.qq.com/cgi-bin/ver");
     EncodePass encoder = EncodePass(password, vcode, uin);
@@ -96,7 +79,16 @@ int main()
     pos_2 = vfwebqq.find_last_of("\"");
     vfwebqq = vfwebqq.substr(pos_1 +2, pos_2-pos_1-3);
     uri="http://s.web2.qq.com/api/get_user_friends2";
-    body = "r=%7B%22h%22%3A%22hello%22%2C%22vfwebqq%22%3A%22"+ vfwebqq +"%22%7D";
+
+    Json::Value test;
+    test["h"]= "hello";
+    test["vfwebqq"]= vfwebqq;
+    Json::FastWriter writer;
+    body = writer.write(test);
+    body = "r="+urlencode(body);
+    debug_info("%s", body.c_str());
+    test.clear();
+
     headers.clear();
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20101025002");
     std::vector<curlpp::OptionBase*> settings2;
@@ -105,9 +97,9 @@ int main()
     request->setOptions(settings2);
     result = request->requestServer(uri, body);
     std::cout<<result<<std::endl;
-    //jsonReader.parse(result, root, false);
-    //item = root["result"];
-    //std::cout<<item<<std::endl;
+    jsonReader.parse(result, root, false);
+    item = root["result"];
+    std::cout<<item<<std::endl;
 
     uri="http://s.web2.qq.com/api/get_group_name_list_mask2";
     body="r=%7B%22vfwebqq%22%3A%22"+vfwebqq+"%22%7D";

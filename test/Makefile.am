@@ -1,6 +1,8 @@
-noinst_PROGRAMS=testhttpclient testmd5 testjsoncpp testthreadpool
+noinst_PROGRAMS=testhttpclient testmd5 testjsoncpp testthreadpool testutil
 
 testhttpclient_SOURCES=testhttpclient.cpp
+
+testutil_SOURCES=testutil.cpp
 
 testmd5_SOURCES=testmd5.cpp
 

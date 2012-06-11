@@ -85,7 +85,10 @@ std::vector<std::string> & Cookie::splitCookieStr(const std::string &str, std::v
 HttpClient::HttpClient():request(NULL)
 {
     cookies.clear();
-    //request = new curlpp::Easy();
+    if ( request == NULL)
+    {
+        request = new curlpp::Easy();
+    }
 }
 
 HttpClient::~HttpClient()
@@ -109,7 +112,7 @@ void HttpClient::perform()
     try
     {
         curlpp::Cleanup myCleanup;
-        request->setOpt(new curlpp::options::Verbose(true));
+        request->setOpt(new curlpp::options::Verbose(0));
         if ( request)
         {
             if ( !cookies.empty())
@@ -146,7 +149,6 @@ void HttpClient::perform()
 void HttpClient::reset()
 {
     request = new curlpp::Easy();
-    //request -> setOpt(new curlpp::options::Verbose(true));
 }
 
 std::string HttpClient::requestServer(const std::string & uri, const std::string body )
@@ -157,19 +159,15 @@ std::string HttpClient::requestServer(const std::string & uri, const std::string
 
         if ( request)
         {
-	    debug_info("Uri:%s", uri.c_str());
+            debug_info("Uri:%s", uri.c_str());
             request->setOpt( new curlpp::options::Url(uri));
         }
 
         if ( body != std::string(""))
         {
-	    std::cout<<body<<std::endl;
-	    request->setOpt(new curlpp::options::PostFields(body));
-	    request->setOpt(new curlpp::options::PostFieldSize(body.size()));
-            //std::istringstream myStream(body);
-            //request->setOpt(new curlpp::options::ReadStream(&myStream));
-            //request->setOpt(new curlpp::options::InfileSize(body.size()));
-            //request->setOpt(new curlpp::options::Upload(true));
+            std::cout<<body<<std::endl;
+            request->setOpt(new curlpp::options::PostFields(body));
+            request->setOpt(new curlpp::options::PostFieldSize(body.size()));
         }
         curlpp::types::WriteFunctionFunctor functor(&mWriterChunk,
                                                     &WriterMemoryClass::WriteMemoryCallback);
@@ -197,7 +195,6 @@ bool HttpClient::getValueFromCookie( const std::string &key, std::string &value)
          it != cookies.end();  ++it)
     {
         Cookie cookie = Cookie(*it);
-        //std::cout<<cookie<<std::endl;
         if ( cookie.name == key)
         {
             value =cookie.value;

@@ -112,10 +112,8 @@ private:
     std::vector<std::string> & split_cookie_str(const std::string &str, std::vector<std::string> &in);
 };
 
-
-class HttpClient: public Singleton<HttpClient>
+class HttpClient:public Singleton<HttpClient>
 {
-
     friend class Singleton<HttpClient>;
     std::list<std::string> cookies;
 
