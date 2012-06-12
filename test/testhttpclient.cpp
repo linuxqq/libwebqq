@@ -17,8 +17,49 @@
 #include "json/json.h"
 #include "QQDebug.h"
 #include "QQUtil.h"
+#include "ThreadPool.h"
 using namespace std;
 using namespace QQUtil;
+
+class Poll2:public ThreadPool::TPool::TJob
+{
+    std::string body;
+    std::list<std::string> cookies;
+public:
+
+    Poll2(const std::string & data)
+    {
+        body = data;
+    }
+
+    Poll2(std::list<std::string> cookies, const std::string & data)
+    {
+        body = data;
+        this->cookies = cookies;
+    }
+
+    virtual void run(void *)
+    {
+        while(1)
+        {
+            HttpClient * client;
+            if ( cookies.empty())
+                client = new HttpClient();
+            else
+                client = new HttpClient(cookies);
+            std::list<std::string> headers;
+            headers.push_back("http://d.web2.qq.com/proxy.html?v=20110331002");
+            std::vector<curlpp::OptionBase*> settings;
+            settings.push_back(new curlpp::options::HttpHeader(headers));
+            client->setOptions(settings);
+            //client->addCookie("pgv_pvid=5065687646;");
+            //client->addCookie("pgv_info=pgvReferrer=&ssid=s9227774306;");
+            std::string result = client->requestServer("http://d.web2.qq.com/channel/poll2",body);
+            std::cout<<result<<std::endl;
+            delete client;
+        }
+    }
+};
 
 int main()
 {
@@ -54,9 +95,9 @@ int main()
         cout<<"Fuck fail"<<endl;
 
     std::cout<<result<<endl;
-
+    std::string clientid="98403775";
     uri = "http://d.web2.qq.com/channel/login2";
-    body = "r=%7B%22status%22%3A%22online%22%2C%22ptwebqq%22%3A%22"+ ptwebqq +  "%22%2C%22passwd_sig%22%3A%22%22%2C%22clientid%22%3A%2298403775%22%2C%22psessionid%22%3Anull%7D&clientid=98403775&psessionid=null";
+    body = "r=%7B%22status%22%3A%22online%22%2C%22ptwebqq%22%3A%22"+ ptwebqq +  "%22%2C%22passwd_sig%22%3A%22%22%2C%22clientid%22%3A%22"+clientid+"%22%2C%22psessionid%22%3Anull%7D&clientid="+clientid+"&psessionid=null";
     request = Singleton<HttpClient>::getInstance();
     std::list<std::string> headers;
     headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=2");
@@ -78,6 +119,15 @@ int main()
     pos_1 = vfwebqq.find("\"");
     pos_2 = vfwebqq.find_last_of("\"");
     vfwebqq = vfwebqq.substr(pos_1 +2, pos_2-pos_1-3);
+
+    std::string psessionid = root["result"]["psessionid"].asString();
+    debug_info("psessionid origin = %s", psessionid.c_str());
+    pos_1= psessionid.find("\"");
+    pos_2 = psessionid.find_last_of("\"");
+
+    psessionid.substr(pos_1+2 , pos_2-pos_1 -3);
+    debug_info("psessionid = %s", psessionid.c_str());
+
     uri="http://s.web2.qq.com/api/get_user_friends2";
 
     Json::Value test;
@@ -97,9 +147,10 @@ int main()
     request->setOptions(settings2);
     result = request->requestServer(uri, body);
     std::cout<<result<<std::endl;
-    jsonReader.parse(result, root, false);
-    item = root["result"];
-    std::cout<<item<<std::endl;
+    std::list<std::string> cookies = request->dumpCookies();
+    //jsonReader.parse(result, root, false);
+    //item = root["result"];
+    //std::cout<<item<<std::endl;
 
     uri="http://s.web2.qq.com/api/get_group_name_list_mask2";
     body="r=%7B%22vfwebqq%22%3A%22"+vfwebqq+"%22%7D";
@@ -113,8 +164,29 @@ int main()
     result = request->requestServer(uri, body);
     cout<<result<<endl;
 
-    jsonReader.parse(result, root, false);
-    item = root["result"];
-    std::cout<<item<<std::endl;
+    //jsonReader.parse(result, root, false);
+    //item = root["result"];
+    //std::cout<<item<<std::endl;
+
+    uri = "http://d.web2.qq.com/channel/get_online_buddies2?clientid="+clientid+"&psessionid="+psessionid+"&t=1339476455338";
+    request = Singleton<HttpClient>::getInstance();
+    headers.clear();
+    headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=1&id=2");
+    std::vector<curlpp::OptionBase*> settings4;
+    settings4.push_back(new curlpp::options::HttpHeader(headers));
+    request->setOptions(settings4);
+    result = request->requestServer(uri);
+    cout<<result<<endl;
+
+    body ="r=%7B%22clientid%22%3A%22"+clientid+"%22%2C%22psessionid%22%3A%22"+psessionid+"%22%2C%22key%22%3A0%2C%22ids%22%3A%5B%5D%7D&clientid="+clientid+"&psessionid="+ psessionid;
+
+    std::cout<<body<<std::endl;
+
+    ThreadPool::init(4);
+    Poll2 * job1 = new Poll2( body );
+    ThreadPool::run(job1, NULL, true);
+
+    ThreadPool::sync_all();
+    ThreadPool::done();
     return 0;
 }

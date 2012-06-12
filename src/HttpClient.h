@@ -122,11 +122,17 @@ class HttpClient:public Singleton<HttpClient>
 public:
 
     HttpClient();
+
+    HttpClient(std::list<std::string> cookie_list);
+
     ~HttpClient();
 
     void setOptions(std::vector<curlpp::OptionBase *> options) throw(curlpp::RuntimeError);
+    void addCookie(const std::string &cookie);
     void addCookies(std::list<std::string> cookies);
     bool  getValueFromCookie(const std::string  & key , std::string & value);
+
+    std::list<std::string> dumpCookies();
 
     std::string requestServer( const std::string & uri, const std::string body ="");
 

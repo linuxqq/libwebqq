@@ -91,6 +91,15 @@ HttpClient::HttpClient():request(NULL)
     }
 }
 
+HttpClient::HttpClient( std::list<std::string> cookie_list):request(NULL)
+{
+    cookies = cookie_list;
+    if( request == NULL)
+    {
+        request = new curlpp::Easy();
+    }
+}
+
 HttpClient::~HttpClient()
 {
     cookies.clear();
@@ -103,10 +112,14 @@ void HttpClient::setOptions(std::vector<curlpp::OptionBase *> options) throw(cur
 
 void HttpClient::addCookies(std::list<std::string> cookies)
 {
-
     (this->cookies).insert(this->cookies.end(), cookies.begin(),cookies.end());
-
 }
+
+void HttpClient::addCookie(const std::string &cookie)
+{
+    cookies.push_back(cookie);
+}
+
 void HttpClient::perform()
 {
     try
@@ -202,4 +215,11 @@ bool HttpClient::getValueFromCookie( const std::string &key, std::string &value)
         }
     }
     return false;
+}
+
+std::list<std::string> HttpClient::dumpCookies()
+{
+    std::list<std::string> cookielist;
+    cookielist = cookies;
+    return cookielist;
 }
