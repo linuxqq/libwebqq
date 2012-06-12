@@ -48,14 +48,21 @@ public:
             else
                 client = new HttpClient(cookies);
             std::list<std::string> headers;
-            headers.push_back("http://d.web2.qq.com/proxy.html?v=20110331002");
+            headers.push_back("Referer: http://d.web2.qq.com/proxy.html");
             std::vector<curlpp::OptionBase*> settings;
             settings.push_back(new curlpp::options::HttpHeader(headers));
             client->setOptions(settings);
-            //client->addCookie("pgv_pvid=5065687646;");
-            //client->addCookie("pgv_info=pgvReferrer=&ssid=s9227774306;");
             std::string result = client->requestServer("http://d.web2.qq.com/channel/poll2",body);
             std::cout<<result<<std::endl;
+            Json::Reader jsonReader;
+            Json::Value root;
+            jsonReader.parse(result, root, false);
+            int ret= root["retcode"].asInt();
+            if ( ret == 103)
+            {
+                debug_info("lost connection.");
+                sleep(5);
+            }
             delete client;
         }
     }
@@ -65,6 +72,8 @@ int main()
 {
     std::string usr="1421032531";//"1421032531";
     std::string password="1234567890";
+
+    ThreadPool::init(4);
     std::string uri("http://check.ptlogin2.qq.com/check?uin="+usr+"&appid=1003903&r=0.09714792561565866");
     HttpClient * request = Singleton<HttpClient>::getInstance();
     std::string result = request->requestServer(uri);
@@ -107,7 +116,7 @@ int main()
     result = request->requestServer(uri, body);
     std::cout<<result<<std::endl;
 
-     std::string vfwebqq;
+    std::string vfwebqq;
 
     Json::Reader jsonReader;
     Json::Value root, item;
@@ -127,10 +136,19 @@ int main()
 
     psessionid.substr(pos_1+2 , pos_2-pos_1 -3);
     debug_info("psessionid = %s", psessionid.c_str());
+    std::list<std::string> cookies = request->dumpCookies();
+
+    body ="r=%7B%22clientid%22%3A%22"+clientid+"%22%2C%22psessionid%22%3A%22"+psessionid+"%22%2C%22key%22%3A0%2C%22ids%22%3A%5B%5D%7D&clientid="+clientid+"&psessionid="+ psessionid;
+
+    std::cout<<body<<std::endl;
+
+    Poll2 * job1 = new Poll2( cookies, body );
+    ThreadPool::run(job1, NULL, true);
+
 
     uri="http://s.web2.qq.com/api/get_user_friends2";
 
-    Json::Value test;
+        Json::Value test;
     test["h"]= "hello";
     test["vfwebqq"]= vfwebqq;
     Json::FastWriter writer;
@@ -147,10 +165,6 @@ int main()
     request->setOptions(settings2);
     result = request->requestServer(uri, body);
     std::cout<<result<<std::endl;
-    std::list<std::string> cookies = request->dumpCookies();
-    //jsonReader.parse(result, root, false);
-    //item = root["result"];
-    //std::cout<<item<<std::endl;
 
     uri="http://s.web2.qq.com/api/get_group_name_list_mask2";
     body="r=%7B%22vfwebqq%22%3A%22"+vfwebqq+"%22%7D";
@@ -164,10 +178,6 @@ int main()
     result = request->requestServer(uri, body);
     cout<<result<<endl;
 
-    //jsonReader.parse(result, root, false);
-    //item = root["result"];
-    //std::cout<<item<<std::endl;
-
     uri = "http://d.web2.qq.com/channel/get_online_buddies2?clientid="+clientid+"&psessionid="+psessionid+"&t=1339476455338";
     request = Singleton<HttpClient>::getInstance();
     headers.clear();
@@ -178,13 +188,6 @@ int main()
     result = request->requestServer(uri);
     cout<<result<<endl;
 
-    body ="r=%7B%22clientid%22%3A%22"+clientid+"%22%2C%22psessionid%22%3A%22"+psessionid+"%22%2C%22key%22%3A0%2C%22ids%22%3A%5B%5D%7D&clientid="+clientid+"&psessionid="+ psessionid;
-
-    std::cout<<body<<std::endl;
-
-    ThreadPool::init(4);
-    Poll2 * job1 = new Poll2( body );
-    ThreadPool::run(job1, NULL, true);
 
     ThreadPool::sync_all();
     ThreadPool::done();
