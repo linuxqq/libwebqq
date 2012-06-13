@@ -13,6 +13,7 @@
 #include <string>
 #include <list>
 #include "Singleton.h"
+
 enum  Event{
     ON_RECEIVE_MESSAGE = 512,
     ON_SEND_MESSAGE,
@@ -67,10 +68,11 @@ struct Birthday {
 };
 
 struct QQBuddy{
-    std::string uin;               //the uin. Change every login
+    std::string  uin;               //the uin. Change every login
     std::string qqnumber;          //the qq number
     std::string status;
-    int vip_info;
+    int is_vip;
+    int vip_level;
     std::string nick;              //
     std::string markname;
 
@@ -112,13 +114,34 @@ struct QQBuddy{
 struct QQCategory{
     std::string name;
     int index;
-
-    /*
-     * The pointers of the members QQBuddy instance.
-     */
-
-    std::list<QQBuddy *> members;
 };
+inline bool operator<( const QQCategory & cate1, const QQCategory & cate2)
+{
+    return cate1.index < cate2.index;
+}
+
+
+struct QQGroup{
+    std::string name;
+    std::string  gid;
+    std::string gnumber;
+    std::string code;
+    std::string flag;
+    std::string owner;
+    std::string mark;
+    std::string mask;
+    std::string option;
+    std::string createtime;
+    std::string gclass;
+    std::string level;
+    std::string face;
+    std::string memo;
+    std::string fingermemo;
+};
+
+inline bool operator<(const QQGroup & group1, const QQGroup & group2){
+        return group1.gid < group2.gid;
+}
 
 struct QQConfig:public Singleton<QQConfig>
 {

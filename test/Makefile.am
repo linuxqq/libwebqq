@@ -1,4 +1,4 @@
-noinst_PROGRAMS=testhttpclient testmd5 testjsoncpp testthreadpool testutil
+noinst_PROGRAMS=testhttpclient testmd5 testjsoncpp testthreadpool testutil testplugin
 
 testhttpclient_SOURCES=testhttpclient.cpp
 
@@ -9,6 +9,8 @@ testmd5_SOURCES=testmd5.cpp
 testthreadpool_SOURCES=testthreadpool.cpp
 
 testjsoncpp_SOURCES=jsontest.h jsontest.cpp testjsoncpp.cpp
+
+testplugin_SOURCES=testplugin.cpp
 
 
 AM_LDFLAGS = -L${srcdir}/../src -lwebqq
