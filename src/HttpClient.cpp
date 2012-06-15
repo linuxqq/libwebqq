@@ -166,6 +166,7 @@ void HttpClient::reset()
 
 std::string HttpClient::requestServer(const std::string & uri, const std::string body )
 {
+    std::string result;
     try{
 
         WriterMemoryClass mWriterChunk;
@@ -189,7 +190,9 @@ std::string HttpClient::requestServer(const std::string & uri, const std::string
         delete test;
 
         perform();
-        return mWriterChunk.getContent();
+        result = mWriterChunk.getContent();
+        debug_info("Result:%s", result.c_str());
+        return result;
     }
     catch(curlpp::RuntimeError & e)
     {

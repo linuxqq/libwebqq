@@ -25,8 +25,9 @@ public:
     ~EncodePass(){ }
 private:
 
-    std::string  hexchar2bin(const std::string data);
+    char *hexchar2bin(const std::string data, int &length);
     std::string  md5(const std::string data);
+    std::string  md5(const unsigned char *data, int length);
 
 };
 

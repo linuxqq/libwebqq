@@ -14,5 +14,6 @@ libwebqq_la_SOURCES= Thread.h Thread.cpp \
    		     QQTypes.h
 
 AM_CFLAGS = -g  -Wall -Werror -D_REENTRANT  -Wall -Wno-long-long -Wshadow -Wpacked -Wundef -Wchar-subscripts  -pedantic -ansi
+AM_LDFLAGS =
 
 

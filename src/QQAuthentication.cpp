@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 #include <vector>
 
 EncodePass::EncodePass(const std::string password, const std::string vcode, const std::string uin)
@@ -45,17 +46,36 @@ std::string EncodePass::md5(const std::string data)
     return result;
 }
 
-std::string EncodePass::hexchar2bin(const std::string data)
+std::string EncodePass::md5(const unsigned char *data, int length)
 {
-    char*buf = new char[ data.size()/2 +1];
+    unsigned char * p = NULL;
+    p = (unsigned char *)lutil_md5_data(data , length,  (char *)(p) );
+    if ( p == NULL)
+    {
+        debug_error("EncodePass Error");
+    }
+
+    std::string result = std::string( reinterpret_cast<char *>(p));
+    std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+
+    if (p ) free(p);
+    return result;
+}
+
+char *EncodePass::hexchar2bin(const std::string data, int &length)
+{
+    length = data.size()/2;
+    char*buf = new char[ data.size()/2];
     int j = 0;
+    const char *data_str;
+    data_str = data.c_str();
+    memset(buf, 0, length);
     for (int i = 0; i < data.size(); i = i + 2) {
         char ints[3]= {0};
         memset(ints, 0, sizeof(ints));
-        memcpy( ints, data.c_str() + i , 2);
+        memcpy(ints, data_str + i , 2);
         char *endptr;
         long int iv = strtol(ints,&endptr,16 );
-
         if  ( ints == endptr)
         {
             debug_error("No string to parse.");
@@ -69,9 +89,7 @@ std::string EncodePass::hexchar2bin(const std::string data)
         else
             buf[j++] =( unsigned char ) iv;
     }
-    std::string result = std::string(buf);
-    delete buf;
-    return result;
+    return buf;
 }
 
 std::string EncodePass::encode()
@@ -110,8 +128,15 @@ std::string EncodePass::encode()
     }
 
     delete [] str;
-
-    std::string result = hexchar2bin( md5(passcode)) + uin_str;
-    result = md5(md5(result) + vcode);
+    std::string result;
+    int len1, len2;
+    char *tmp1 = hexchar2bin(md5(passcode), len1);
+    len2 = len1+uin_str.size();
+    char *tmp2 = new char[len2];
+    memcpy(tmp2, tmp1, len1);
+    memcpy(tmp2+len1, uin_str.c_str(), uin_str.size());
+    delete []tmp1;
+    result = md5(md5((unsigned char *)tmp2, len2) + vcode);
+    delete []tmp2;
     return result;
 }
