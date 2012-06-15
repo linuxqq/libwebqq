@@ -1,5 +1,7 @@
 noinst_PROGRAMS=testhttpclient testmd5 testjsoncpp testthreadpool testutil testplugin
 
+testhttpclient_LDADD = $(CURLPP_LIBS)
+
 testhttpclient_SOURCES=testhttpclient.cpp
 
 testutil_SOURCES=testutil.cpp
@@ -15,3 +17,4 @@ testplugin_SOURCES=testplugin.cpp
 
 AM_LDFLAGS = -L${srcdir}/../src -lwebqq
 AM_CPPFLAGS = -I${srcdir}/../src -I${srcdir}/../jsoncpp/include -g 
+
