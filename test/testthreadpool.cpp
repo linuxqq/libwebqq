@@ -30,7 +30,11 @@ class TBenchJob2: public ThreadPool::TPool::TJob
 {
 public:
     virtual void run (void *){
-        status  =0;
+    	while( 1)
+	{
+		std::cout<<"Test2"<<std::endl;
+		sleep(1);
+	}
     }
 };
 

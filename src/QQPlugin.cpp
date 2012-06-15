@@ -18,7 +18,10 @@
 #include "json/json.h"
 #include "QQTypes.h"
 #include "json/writer.h"
+#include "ThreadPool.h"
+
 using namespace QQUtil;
+
 
 ResourceManager::ResourceManager()
 {
@@ -64,7 +67,6 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
 
     HttpClient * request = Singleton<HttpClient>::getInstance();
     std::string result = request->requestServer(uri);
-
     size_t pos_1 = result.find("(");
     size_t pos_2 = result.find(")");
 
@@ -131,6 +133,21 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
             get_user_friends();
             get_group_name_list();
             debug_info("Login Sucess ... (%s,%d)", __FILE__, __LINE__);
+
+            std::string body ="r=%7B%22clientid%22%3A%22"+clientid+    \
+                  "%22%2C%22psessionid%22%3A%22"+psessionid\
+                  +"%22%2C%22key%22%3A0%2C%22ids%22%3A%5B%5D%7D&clientid="+\
+                  clientid+"&psessionid="+ psessionid;
+
+            std::cout<<body<<std::endl;
+
+            Poll2 * job = new Poll2(body );
+            //ThreadPool::run(job1, NULL, true);
+            //job1->run(NULL);
+            job->create( false, false );
+            job->join();
+
+            delete job;
         }
         else
         {
@@ -174,6 +191,13 @@ void QQPlugin::get_user_friends()
         if ( 0 == retcode)
         {
             parse_user_friends(root);
+            for( std::map<std::string , QQBuddy>::iterator it = res->contacts.begin();
+                 it != res->contacts.end(); it ++)
+            {
+                GetLongNick*  getnick = new GetLongNick( it->first, vfwebqq);
+                ThreadPool::run(getnick,res, true);
+            }
+
             debug_info("Get friends list Success ... (%s,%d)", __FILE__, __LINE__);
         }
         else
@@ -211,7 +235,6 @@ void QQPlugin::parse_user_friends(const Json::Value & root)
             QQBuddy buddy;
             buddy.cate_index = (*it)["categories"].asInt();
             buddy.uin = writer.write((*it)["uin"]);
-            buddy.flag = writer.write((*it)["flag"]);
             res->contacts[buddy.uin] = buddy;
         }
 
@@ -254,6 +277,10 @@ void QQPlugin::get_group_name_list()
     settings.push_back(new curlpp::options::HttpHeader(headers));
     request->setOptions(settings);
     std::string result = request->requestServer(uri, body);
+
+    delete request;
+    request = NULL;
+
     try
     {
         Json::FastWriter writer;
@@ -285,5 +312,88 @@ void QQPlugin::get_group_name_list()
     {
         debug_error("Cant not parse json body ... (%s,%d)", \
                     __FILE__, __LINE__);
+    }
+}
+
+QQPlugin::GetLongNick::GetLongNick( const std::string & uin, const std::string & vfwebqq )
+{
+    this->uin = uin;
+    this->vfwebqq = vfwebqq;
+}
+
+void QQPlugin::GetLongNick::run(void *ptr)
+{
+
+    ResourceManager *res = reinterpret_cast < ResourceManager *>(ptr);
+    std::string temp_uin = uin;
+    std::string::size_type p = temp_uin.find_last_of('\n');
+    if(p != std::string::npos) temp_uin.erase(p);
+
+    HttpClient *request = new HttpClient();
+    std::string uri = "http://s.web2.qq.com/api/get_single_long_nick2?tuin="+\
+                      temp_uin + "&vfwebqq="+ vfwebqq;
+
+    std::list<std::string> headers;
+    headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
+
+    std::vector<curlpp::OptionBase*> settings;
+    settings.push_back(new curlpp::options::HttpHeader(headers));
+    request->setOptions(settings);
+    std::string result = request->requestServer(uri);
+    res->lock();
+
+    try{
+
+        Json::FastWriter writer;
+        Json::Reader jsonReader;
+        Json::Value root;
+        jsonReader.parse(result, root, false);
+        int retcode = root["retcode"].asInt();
+        if ( 0 == retcode)
+        {
+            res->contacts[uin].lnick= writer.write( root["result"][0]["lnick"]);
+        }
+        else
+        {
+            debug_info("Get long  nick failed with error code %d ... (%s,%d)", retcode, __FILE__, __LINE__);
+        }
+
+    }catch(...)
+    {
+        debug_error("Failed to parse json content... (%s,%d)", __FILE__, __LINE__);
+    }
+    res->ulock();
+    delete request;
+}
+
+QQPlugin::Poll2::Poll2(const std::string & data)
+{
+    this->body = data;
+}
+
+void QQPlugin::Poll2::run()
+{
+    while(1)
+    {
+        HttpClient * client;
+        client = new HttpClient();
+        std::list<std::string> headers;
+
+        headers.push_back("Referer: http://d.web2.qq.com/proxy.html");
+        std::vector<curlpp::OptionBase*> settings;
+        settings.push_back(new curlpp::options::HttpHeader(headers));
+        client->setOptions(settings);
+        std::string result = client->requestServer("http://d.web2.qq.com/channel/poll2",body);
+        std::cout<<result<<std::endl;
+
+        Json::Reader jsonReader;
+        Json::Value root;
+        jsonReader.parse(result, root, false);
+        int ret= root["retcode"].asInt();
+        if ( ret == 103)
+        {
+            debug_info("lost connection.");
+        }
+        delete client;
     }
 }

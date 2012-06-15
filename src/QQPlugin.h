@@ -22,7 +22,7 @@
 #include "QQTypes.h"
 #include "Action.h"
 #include "json/json.h"
-
+#include "ThreadPool.h"
 struct ResourceManager:Singleton<ResourceManager>
 {
 
@@ -42,6 +42,7 @@ public:
     void ulock();
 };
 
+
 class QQPlugin: public Singleton<QQPlugin>
 {
 
@@ -50,13 +51,35 @@ class QQPlugin: public Singleton<QQPlugin>
     std::string clientid;
     std::string psessionid;
     std::string ptwebqq;
+
 public:
 
     virtual  ~QQPlugin();
 
+    class GetLongNick:public ThreadPool::TPool::TJob{
+    public:
+        GetLongNick(const std::string & uin, const std::string & vfwebqq);
+
+        virtual void run(void *);
+
+    private:
+        std::string uin;
+        std::string vfwebqq;
+    };
+
+    class Poll2:public ThreadPool::TThread
+    {
+        std::string body;
+
+    public:
+
+        Poll2(const std::string & data);
+        virtual void run();
+    };
+
     bool  webqq_login( const std::string &uin, const std::string & password, const std::string & status="online");
 
-    bool webqq_logout();
+    //bool webqq_logout();
 
 private:
 

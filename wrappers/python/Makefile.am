@@ -1,4 +1,4 @@
-AM_CPPFLAGS= ${PYTHON_CFLAGS} -I../../src
+AM_CPPFLAGS= ${PYTHON_CFLAGS} -I../../src -I../../jsoncpp/include
 EXTRA_DIST = libwebqq.i
 python_PYTHON =  libwebqqpython.py
 
@@ -10,7 +10,7 @@ libwebqqpython_la_LIBADD=../../src/libwebqq.la -L../../jsoncpp/src/ -ljsoncpp
 
 
 libwebqqpython.cpp: libwebqq.i
-	swig -c++ -python -I../../src -o $@ $<
+	swig -c++ -python -I../../src -I../../jsoncpp/include -o $@ $<
 
 clean-local:
 	rm -f libwebqqpython.py  libwebqqpython.h libwebqqpython.cpp *.pyc

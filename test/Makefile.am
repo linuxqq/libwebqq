@@ -14,4 +14,4 @@ testplugin_SOURCES=testplugin.cpp
 
 
 AM_LDFLAGS = -L${srcdir}/../src -lwebqq
-AM_CPPFLAGS = -I${srcdir}/../src -I${srcdir}/../jsoncpp/include
+AM_CPPFLAGS = -I${srcdir}/../src -I${srcdir}/../jsoncpp/include -g 
