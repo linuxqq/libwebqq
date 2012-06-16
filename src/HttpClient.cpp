@@ -179,7 +179,7 @@ std::string HttpClient::requestServer(const std::string & uri, const std::string
 
         if ( body != std::string(""))
         {
-            std::cout<<body<<std::endl;
+            //std::cout<<body<<std::endl;
             request->setOpt(new curlpp::options::PostFields(body));
             request->setOpt(new curlpp::options::PostFieldSize(body.size()));
         }
@@ -191,7 +191,7 @@ std::string HttpClient::requestServer(const std::string & uri, const std::string
 
         perform();
         result = mWriterChunk.getContent();
-        debug_info("Result:%s", result.c_str());
+        //debug_info("Result:%s", result.c_str());
         return result;
     }
     catch(curlpp::RuntimeError & e)

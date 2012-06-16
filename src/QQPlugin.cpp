@@ -46,7 +46,7 @@ void ResourceManager::ulock()
 
 QQPlugin::QQPlugin()
 {
-    ThreadPool::init(4);
+    ThreadPool::init(8);
     res = Singleton<ResourceManager>::getInstance();
 
     clientid="98403775";
@@ -133,6 +133,7 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
         {
             get_user_friends();
             get_group_name_list();
+            ThreadPool::sync_all();
             debug_info("Login Sucess ... (%s,%d)", __FILE__, __LINE__);
 
             std::string body ="r=%7B%22clientid%22%3A%22"+clientid+    \
@@ -142,13 +143,9 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
 
             std::cout<<body<<std::endl;
 
-            Poll2 * job = new Poll2(body );
-            //ThreadPool::run(job1, NULL, true);
-            //job1->run(NULL);
-            job->create( false, false );
-            job->join();
+            Poll2 * poll = new Poll2(body );
+            ThreadPool::run(poll, NULL, true);
 
-            delete job;
         }
         else
         {
@@ -198,6 +195,9 @@ void QQPlugin::get_user_friends()
             {
                 GetLongNick*  getnick = new GetLongNick( it->first, vfwebqq);
                 ThreadPool::run(getnick,res, true);
+
+                GetFriendsInfo2 * getinfo = new GetFriendsInfo2( it->first, vfwebqq);
+                ThreadPool::run(getinfo, res, true);
             }
 
             debug_info("Get friends list Success ... (%s,%d)", __FILE__, __LINE__);
@@ -370,12 +370,85 @@ void QQPlugin::GetLongNick::run(void *ptr)
     delete request;
 }
 
+QQPlugin::GetFriendsInfo2::GetFriendsInfo2( const std::string & uin, const std::string & vfwebqq )
+{
+    this-> uin = uin;
+    this->vfwebqq = vfwebqq ;
+}
+
+void QQPlugin::GetFriendsInfo2::run( void * ptr)
+{
+     ResourceManager *res = reinterpret_cast < ResourceManager *>(ptr);
+    std::string temp_uin = uin;
+    std::string::size_type p = temp_uin.find_last_of('\n');
+    if(p != std::string::npos) temp_uin.erase(p);
+
+    HttpClient *request = new HttpClient();
+    std::string uri = "http://s.web2.qq.com/api/get_friend_info2?tuin="+\
+                      temp_uin + "&vfwebqq="+ vfwebqq;
+
+    std::list<std::string> headers;
+    headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
+
+    std::vector<curlpp::OptionBase*> settings;
+    settings.push_back(new curlpp::options::HttpHeader(headers));
+    settings.push_back(new curlpp::options::NoSignal(1));
+    request->setOptions(settings);
+    std::string result = request->requestServer(uri);
+    res->lock();
+    debug_info("GetFriendsInfo: %s", result.c_str());
+    try
+    {
+        Json::FastWriter writer;
+        Json::Reader jsonReader;
+        Json::Value root;
+        jsonReader.parse(result, root, false);
+        int retcode = root["retcode"].asInt();
+        if ( 0 == retcode)
+        {
+            Birthday birthday ;
+            birthday.year = root["result"]["Birthday"]["year"].asInt();
+            birthday.month = root["result"]["Birthday"]["month"].asInt();
+            birthday.month = root["result"]["Birthday"]["day"].asInt();
+            res->contacts[uin].birthday = birthday;
+            res->contacts[uin].blood = root["result"]["blood"].asInt();
+            //res->contacts[uin].face= writer.write( root["result"]["face"]);
+            res->contacts[uin].occupation= writer.write( root["result"]["occupation"]);
+            res->contacts[uin].phone= writer.write( root["result"]["phone"]);
+            res->contacts[uin].allow= root["result"]["allow"].asInt();
+            res->contacts[uin].college= writer.write( root["result"]["college"]);
+            res->contacts[uin].constel=  root["result"]["constel"].asInt();
+            res->contacts[uin].homepage= writer.write( root["result"]["homepage"]);
+            res->contacts[uin].country= writer.write( root["result"]["country"]);
+            res->contacts[uin].city= writer.write( root["result"]["city"]);
+            res->contacts[uin].province = writer.write( root["result"]["province"]);
+            res->contacts[uin].personal= writer.write( root["result"]["personal"]);
+            res->contacts[uin].nick= writer.write( root["result"]["nick"]);
+            res->contacts[uin].gender= writer.write( root["result"]["gender"]);
+            res->contacts[uin].email= writer.write( root["result"]["email"]);
+            res->contacts[uin].shengxiao = root["result"]["shengxiao"].asInt();
+            res->contacts[uin].mobile= writer.write( root["result"]["mobile"]);
+        }
+        else
+        {
+            debug_info("Get friends info2 failed with error code %d ... (%s,%d)", retcode, __FILE__, __LINE__);
+        }
+
+    }catch(...)
+    {
+        debug_error("Cant not parse json body ... (%s,%d)", \
+                    __FILE__, __LINE__);
+    }
+
+    res->ulock();
+}
+
 QQPlugin::Poll2::Poll2(const std::string & data)
 {
     this->body = data;
 }
 
-void QQPlugin::Poll2::run()
+void QQPlugin::Poll2::run( void *)
 {
     while(1)
     {
@@ -398,6 +471,7 @@ void QQPlugin::Poll2::run()
         if ( ret == 103)
         {
             debug_info("lost connection.");
+            break;
         }
         delete client;
     }

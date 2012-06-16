@@ -67,14 +67,24 @@ public:
         std::string vfwebqq;
     };
 
-    class Poll2:public ThreadPool::TThread
+    class GetFriendsInfo2: public ThreadPool::TPool::TJob
+    {
+        std::string uin;
+        std::string vfwebqq;
+
+    public:
+        GetFriendsInfo2( const std::string & uin  , const std::string & vfwebqq );
+        virtual void run( void *);
+    };
+
+    class Poll2:public ThreadPool::TPool::TJob
     {
         std::string body;
 
     public:
 
         Poll2(const std::string & data);
-        virtual void run();
+        virtual void run(void *);
     };
 
     bool  webqq_login( const std::string &uin, const std::string & password, const std::string & status="online");
