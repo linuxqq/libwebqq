@@ -44,10 +44,10 @@ PKG_CHECK_MODULES(SQLITE3, [sqlite3 > 3.3], [
             echo ""
             exit -1])
             
-PKG_CHECK_MODULES(CURLPP, [curlpp >= 0.7],[
-           AC_DEFINE(USE_CURLPP,1,[Use curlpp])
-           AC_SUBST(CURLPP_CFLAGS)
-           AC_SUBST(CURLPP_LIBS)],
+PKG_CHECK_MODULES(CURL, [libcurl >= 7.20],[
+           AC_DEFINE(USE_CURL,1,[Use curl])
+           AC_SUBST(CURL_CFLAGS)
+           AC_SUBST(CURL_LIBS)],
            [
            echo ""
            echo "configure: error: "
@@ -55,6 +55,7 @@ PKG_CHECK_MODULES(CURLPP, [curlpp >= 0.7],[
            echo ""
            exit -1]
            )
+           
 PKG_CHECK_MODULES(PYTHON, [python-2.7 >= 2.7],[
 	  AC_DEFINE(USE_PYTHON, 1 ,[Use python])
 	  AC_SUBST(PYTHON_CFLAGS)

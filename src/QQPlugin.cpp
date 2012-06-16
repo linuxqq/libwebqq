@@ -112,13 +112,13 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
     std::list<std::string> headers;
 
     headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=2");
-    std::vector<curlpp::OptionBase*> settings;
+        
+    request->setHttpHeaders(headers);
 
-    settings.push_back(new curlpp::options::HttpHeader(headers));
-    settings.push_back(new curlpp::options::NoSignal(1));
-
-    request->setOptions(settings);
+    
     result = request->requestServer(uri, body);
+
+    std::cout<<"OK5"<<std::endl;
 
     try
     {
@@ -170,11 +170,9 @@ void QQPlugin::get_user_friends()
     std::list<std::string> headers;
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20101025002");
 
-    std::vector<curlpp::OptionBase*> settings;
-    settings.push_back(new curlpp::options::HttpHeader(headers));
-    settings.push_back(new curlpp::options::NoSignal(1));
     HttpClient * request = Singleton<HttpClient>::getInstance();
-    request->setOptions(settings);
+    
+    request->setHttpHeaders(headers);
 
     std::string body ="r=%7B%22h%22%3A%22hello%22%2C%22vfwebqq%22%3A%22"+\
                       vfwebqq+"%22%7D";
@@ -275,10 +273,8 @@ void QQPlugin::get_group_name_list()
 
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001");
 
-    std::vector<curlpp::OptionBase*> settings;
-    settings.push_back(new curlpp::options::HttpHeader(headers));
-    settings.push_back(new curlpp::options::NoSignal(1));
-    request->setOptions(settings);
+    request->setHttpHeaders(headers);
+    
     std::string result = request->requestServer(uri, body);
 
     delete request;
@@ -339,10 +335,8 @@ void QQPlugin::GetLongNick::run(void *ptr)
     std::list<std::string> headers;
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
 
-    std::vector<curlpp::OptionBase*> settings;
-    settings.push_back(new curlpp::options::HttpHeader(headers));
-    settings.push_back(new curlpp::options::NoSignal(1));
-    request->setOptions(settings);
+    request->setHttpHeaders(headers);
+    
     std::string result = request->requestServer(uri);
     res->lock();
 
@@ -390,10 +384,8 @@ void QQPlugin::GetFriendsInfo2::run( void * ptr)
     std::list<std::string> headers;
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
 
-    std::vector<curlpp::OptionBase*> settings;
-    settings.push_back(new curlpp::options::HttpHeader(headers));
-    settings.push_back(new curlpp::options::NoSignal(1));
-    request->setOptions(settings);
+    request->setHttpHeaders(headers);
+    
     std::string result = request->requestServer(uri);
     res->lock();
     debug_info("GetFriendsInfo: %s", result.c_str());
@@ -457,10 +449,9 @@ void QQPlugin::Poll2::run( void *)
         std::list<std::string> headers;
 
         headers.push_back("Referer: http://d.web2.qq.com/proxy.html");
-        std::vector<curlpp::OptionBase*> settings;
-        settings.push_back(new curlpp::options::HttpHeader(headers));
-        settings.push_back(new curlpp::options::NoSignal(1));
-        client->setOptions(settings);
+
+        client->setHttpHeaders(headers);
+        
         std::string result = client->requestServer("http://d.web2.qq.com/channel/poll2",body);
         std::cout<<result<<std::endl;
 

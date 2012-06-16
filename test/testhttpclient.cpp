@@ -49,9 +49,11 @@ public:
                 client = new HttpClient(cookies);
             std::list<std::string> headers;
             headers.push_back("Referer: http://d.web2.qq.com/proxy.html");
-            std::vector<curlpp::OptionBase*> settings;
-            settings.push_back(new curlpp::options::HttpHeader(headers));
-            client->setOptions(settings);
+            //std::vector<curlpp::OptionBase*> settings;
+            //settings.push_back(new curlpp::options::HttpHeader(headers));
+            //client->setOptions(settings);
+            client->setHttpHeaders(headers);
+            
             std::string result = client->requestServer("http://d.web2.qq.com/channel/poll2",body);
             std::cout<<result<<std::endl;
             Json::Reader jsonReader;
@@ -110,9 +112,11 @@ int main()
     request = Singleton<HttpClient>::getInstance();
     std::list<std::string> headers;
     headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=2");
-    std::vector<curlpp::OptionBase*> settings;
-    settings.push_back(new curlpp::options::HttpHeader(headers));
-    request->setOptions(settings);
+    //std::vector<curlpp::OptionBase*> settings;
+    //settings.push_back(new curlpp::options::HttpHeader(headers));
+    //request->setOptions(settings);
+    request->setHttpHeaders(headers);
+    
     result = request->requestServer(uri, body);
     std::cout<<result<<std::endl;
 
@@ -159,10 +163,12 @@ int main()
 
     headers.clear();
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20101025002");
-    std::vector<curlpp::OptionBase*> settings2;
-    settings2.push_back(new curlpp::options::HttpHeader(headers));
+    //std::vector<curlpp::OptionBase*> settings2;
+    //settings2.push_back(new curlpp::options::HttpHeader(headers));
     request = Singleton<HttpClient>::getInstance();
-    request->setOptions(settings2);
+    //request->setOptions(settings2);
+    request->setHttpHeaders(headers);
+    
     result = request->requestServer(uri, body);
     std::cout<<result<<std::endl;
 
@@ -172,9 +178,11 @@ int main()
     request = Singleton<HttpClient>::getInstance();
     headers.clear();
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001");
-    std::vector<curlpp::OptionBase*> settings3;
-    settings3.push_back(new curlpp::options::HttpHeader(headers));
-    request->setOptions(settings3);
+    //std::vector<curlpp::OptionBase*> settings3;
+    //settings3.push_back(new curlpp::options::HttpHeader(headers));
+    //request->setOptions(settings3);
+    request->setHttpHeaders(headers);
+    
     result = request->requestServer(uri, body);
     cout<<result<<endl;
 
@@ -182,9 +190,11 @@ int main()
     request = Singleton<HttpClient>::getInstance();
     headers.clear();
     headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=1&id=2");
-    std::vector<curlpp::OptionBase*> settings4;
-    settings4.push_back(new curlpp::options::HttpHeader(headers));
-    request->setOptions(settings4);
+    //std::vector<curlpp::OptionBase*> settings4;
+    //settings4.push_back(new curlpp::options::HttpHeader(headers));
+    //request->setOptions(settings4);
+    request->setHttpHeaders(headers);
+    
     result = request->requestServer(uri);
     cout<<result<<endl;
 

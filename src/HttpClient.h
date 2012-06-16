@@ -16,9 +16,10 @@
 #include "Singleton.h"
 
 #include <cstring>
-#include <curlpp/cURLpp.hpp>
-#include <curlpp/Easy.hpp>
-#include <curlpp/Options.hpp>
+
+#include <cstdlib>
+#include <curl/curl.h>
+
 
 #define MAX_FILE_LENGTH 20000
 
@@ -70,6 +71,15 @@ public:
     {
         return std::string(m_pBuffer);
     }
+    
+    static size_t WriteMemoryCCallback(char *ptr, size_t size, size_t nmemb,
+        void *instance)
+    {
+        if(instance==NULL) return -1;
+        WriterMemoryClass *wm_instance = reinterpret_cast<WriterMemoryClass *>
+            (instance);
+        return wm_instance->WriteMemoryCallback(ptr, size, nmemb);
+    }
     char* m_pBuffer;
     size_t m_Size;
 };
@@ -116,8 +126,8 @@ class HttpClient:public Singleton<HttpClient>
 {
     friend class Singleton<HttpClient>;
     std::list<std::string> cookies;
-
-    curlpp::Easy * request;
+    CURL *request;
+    struct curl_slist *headers_slist;
 
 public:
 
@@ -127,7 +137,8 @@ public:
 
     ~HttpClient();
 
-    void setOptions(std::vector<curlpp::OptionBase *> options) throw(curlpp::RuntimeError);
+    //void setOptions(std::vector<curlpp::OptionBase *> options);
+    void setHttpHeaders(std::list<std::string> &headers);
     void addCookie(const std::string &cookie);
     void addCookies(std::list<std::string> cookies);
     bool  getValueFromCookie(const std::string  & key , std::string & value);

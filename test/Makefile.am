@@ -1,6 +1,6 @@
 noinst_PROGRAMS=testhttpclient testmd5 testjsoncpp testthreadpool testutil testplugin
 
-testhttpclient_LDADD = $(CURLPP_LIBS)
+testhttpclient_LDADD = $(CURL_LIBS)
 
 testhttpclient_SOURCES=testhttpclient.cpp
 
