@@ -13,6 +13,8 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <sstream>
+
 namespace QQUtil{
 
     void urlInPlaceDecode(std::string& s);
@@ -105,5 +107,26 @@ namespace QQUtil{
             }
         }
         s.erase(w);
+    }
+
+
+
+    int StrToInt(const std::string &str)
+    {
+        std::istringstream strm(str);
+        int i = 0;
+        if(!(strm >> i))
+        {
+            std::cerr<<"Unable to convert string '" + str + "' to integer!"<<
+                std::endl;
+        }
+        return i;
+    }
+
+    std::string IntToStr(int number)
+    {
+        std::stringstream ss;//create a stringstream
+        ss << number;//add number to the stream
+        return ss.str();//return a string with the contents of the stream
     }
 };

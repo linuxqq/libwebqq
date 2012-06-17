@@ -601,12 +601,7 @@ bool QQPlugin::send_buddy_message(const std::string & uin, const std::string & m
 {
     try
     {
-
-/*
-  {"to":830499684,"face":0,"content":"[\"echo\",[\"font\",
-  {\"name\":\"宋体\",\"size\":\"16\",\"style\":[0,0,0],\"color\":\"000000\"}]]","msg_id":70480002,"clientid":"8148643","psessionid":"8368046764001e636f6e6e7365727665725f77656271714031302e3132382e36362e31313200000a4000001b40026e040014b938176d0000000a406474624635533435436d00000028023b216f17c092716f816c1a19ed44ed8e4cf8fd15f99948879b435b8e2928776f7da2639a86e838"}
-
- */
+        /*
         Json::Value root;
         Json::Value font;
 
@@ -622,12 +617,26 @@ bool QQPlugin::send_buddy_message(const std::string & uin, const std::string & m
         root["content"][1][0] = "font";
         root["content"][1][1] = font;
         root["msg_id"] = message_id ++ ;
-        root["clientid"] = clientid;
+        root["clientid"] = QQUtil::StrToInt(clientid);
         root["psessionid"] = psessionid;
         Json::FastWriter writer;
-        std::string body = urlencode(  writer.write(root));
+        std::string body = urlencode(writer.write(root));
+        std::string::size_type p = body.find_last_of('\n');
+        if(p != std::string::npos) body.erase(p);
+        body = "r=" + body;
         body +="&clientid=" + clientid + "&psessionid=" + psessionid;
+        */
 
+        std::string body="r=%7B%22to%22%3A"+ uin \
+                         +"%2C%22face%22%3A0%2C%22content%22%3A%22%5B%5C%22"+\
+                         message_body+\
+                         "%5C%5Cn%5C%22%2C%5B%5C%22font%5C%22%2C%7B%5C%22name%5C%22%3A%5C%22%E5%AE%8B%E4%BD%93%5C%22%2C%5C%22size%5C%22%3A%5C%2216%5C%22%2C%5C%22style%5C%22%3A%5B0%2C0%2C0%5D%2C%5C%22color%5C%22%3A%5C%22000000%5C%22%7D%5D%5D%22%2C%22msg_id%22%3A" + \
+                         QQUtil::IntToStr(message_id)+\
+                         "%2C%22clientid%22%3A%22"+\
+                         clientid+"%22%2C%22psessionid%22%3A%22"+\
+                         psessionid+"%22%7D&clientid="+clientid+"&psessionid="+ psessionid;
+
+        message_id ++;
         bool sucess =false;
 
         SendBuddyMessage * job= new SendBuddyMessage( body);

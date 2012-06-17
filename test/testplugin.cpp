@@ -15,5 +15,6 @@ int main()
     QQPlugin * plugin = Singleton<QQPlugin>::getInstance();
     plugin->webqq_login("1421032531", "1234567890");
 
+    plugin->send_buddy_message("1446372341","test");
     delete plugin;
 }

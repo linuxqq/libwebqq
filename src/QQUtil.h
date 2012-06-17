@@ -23,6 +23,9 @@ namespace QQUtil{
 
     std::string urldecode(const std::string& s);
 
+    int StrToInt(const std::string &str);
+
+    std::string IntToStr(int );
 };
 
 #endif

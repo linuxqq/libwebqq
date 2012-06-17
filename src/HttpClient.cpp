@@ -15,20 +15,9 @@
 #include <vector>
 #include <sstream>
 #include "QQDebug.h"
+#include "QQUtil.h"
 
-int StrToInt(const std::string &str);
-
-int StrToInt(const std::string &str)
-{
-	std::istringstream strm(str);
-	int i = 0;
-	if(!(strm >> i))
-	{
-		std::cerr<<"Unable to convert string '" + str + "' to integer!"<<
-		    std::endl;
-	}
-	return i;
-}
+using namespace QQUtil;
 
 std::ostream & operator<<(std::ostream &strm, const Cookie &cook)
 {
