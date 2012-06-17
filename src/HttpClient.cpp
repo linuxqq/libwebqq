@@ -211,9 +211,9 @@ std::string HttpClient::requestServer(const std::string & uri, const std::string
             curl_easy_setopt(request, CURLOPT_POSTFIELDS, body.c_str());
             curl_easy_setopt(request, CURLOPT_POSTFIELDSIZE, body.size());
         }
-        
+
         curl_easy_setopt(request, CURLOPT_WRITEFUNCTION,
-            &WriterMemoryClass::WriteMemoryCCallback);
+                         &WriterMemoryClass::WriteMemoryCCallback);
         curl_easy_setopt(request, CURLOPT_WRITEDATA, &mWriterChunk);
 
         perform();

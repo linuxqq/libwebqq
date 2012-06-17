@@ -52,6 +52,8 @@ class QQPlugin: public Singleton<QQPlugin>
     std::string psessionid;
     std::string ptwebqq;
 
+    static int message_id;
+
 public:
 
     virtual  ~QQPlugin();
@@ -66,6 +68,18 @@ public:
         std::string uin;
         std::string vfwebqq;
     };
+
+    class GetFriendUin:public ThreadPool::TPool::TJob{
+    public:
+        GetFriendUin( const std::string & uin , const std::string & vfwebqq);
+
+        virtual void run(void *);
+
+    private:
+        std::string uin;
+        std::string vfwebqq;
+    };
+
 
     class GetFriendsInfo2: public ThreadPool::TPool::TJob
     {
@@ -87,7 +101,18 @@ public:
         virtual void run(void *);
     };
 
+    class SendBuddyMessage:public ThreadPool::TPool::TJob{
+        std::string body;
+    public:
+        SendBuddyMessage(const std::string & body);
+        virtual void run(void *);
+    };
+
     bool  webqq_login( const std::string &uin, const std::string & password, const std::string & status="online");
+
+    bool send_buddy_message(const std::string & uin, const std::string & message_body );
+
+    //bool send_group_message(const std::string & uin, const std::string & message_body);
 
     //bool webqq_logout();
 
@@ -100,9 +125,14 @@ private:
 
     void get_group_name_list();
 
+    void get_online_buddies();
+
 
     void reset(){}
     ResourceManager * res;
 
 };
+
+int QQPlugin::message_id = 70480000;
+
 #endif

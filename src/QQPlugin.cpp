@@ -112,13 +112,10 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
     std::list<std::string> headers;
 
     headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=2");
-        
+
     request->setHttpHeaders(headers);
 
-    
     result = request->requestServer(uri, body);
-
-    std::cout<<"OK5"<<std::endl;
 
     try
     {
@@ -134,12 +131,14 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
             get_user_friends();
             get_group_name_list();
             ThreadPool::sync_all();
+            get_online_buddies();
+
             debug_info("Login Sucess ... (%s,%d)", __FILE__, __LINE__);
 
             std::string body ="r=%7B%22clientid%22%3A%22"+clientid+    \
-                  "%22%2C%22psessionid%22%3A%22"+psessionid\
-                  +"%22%2C%22key%22%3A0%2C%22ids%22%3A%5B%5D%7D&clientid="+\
-                  clientid+"&psessionid="+ psessionid;
+                              "%22%2C%22psessionid%22%3A%22"+psessionid\
+                              +"%22%2C%22key%22%3A0%2C%22ids%22%3A%5B%5D%7D&clientid="+\
+                              clientid+"&psessionid="+ psessionid;
 
             std::cout<<body<<std::endl;
 
@@ -171,7 +170,7 @@ void QQPlugin::get_user_friends()
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20101025002");
 
     HttpClient * request = Singleton<HttpClient>::getInstance();
-    
+
     request->setHttpHeaders(headers);
 
     std::string body ="r=%7B%22h%22%3A%22hello%22%2C%22vfwebqq%22%3A%22"+\
@@ -196,6 +195,10 @@ void QQPlugin::get_user_friends()
 
                 GetFriendsInfo2 * getinfo = new GetFriendsInfo2( it->first, vfwebqq);
                 ThreadPool::run(getinfo, res, true);
+
+                GetFriendUin * getuin = new GetFriendUin( it->first, vfwebqq);
+                ThreadPool::run(getuin, res, true);
+
             }
 
             debug_info("Get friends list Success ... (%s,%d)", __FILE__, __LINE__);
@@ -260,7 +263,6 @@ void QQPlugin::parse_user_friends(const Json::Value & root)
 }
 
 
-
 void QQPlugin::get_group_name_list()
 {
     std::string uri="http://s.web2.qq.com/api/get_group_name_list_mask2";
@@ -274,11 +276,9 @@ void QQPlugin::get_group_name_list()
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001");
 
     request->setHttpHeaders(headers);
-    
+
     std::string result = request->requestServer(uri, body);
 
-    delete request;
-    request = NULL;
 
     try
     {
@@ -336,7 +336,7 @@ void QQPlugin::GetLongNick::run(void *ptr)
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
 
     request->setHttpHeaders(headers);
-    
+
     std::string result = request->requestServer(uri);
     res->lock();
 
@@ -364,6 +364,56 @@ void QQPlugin::GetLongNick::run(void *ptr)
     delete request;
 }
 
+QQPlugin::GetFriendUin::GetFriendUin( const std::string & uin, const std::string & vfwebqq)
+{
+    this->uin = uin;
+    this->vfwebqq = vfwebqq;
+}
+
+void QQPlugin::GetFriendUin::run( void * ptr)
+{
+    ResourceManager *res = reinterpret_cast < ResourceManager *>(ptr);
+    std::string temp_uin = uin;
+    std::string::size_type p = temp_uin.find_last_of('\n');
+    if(p != std::string::npos) temp_uin.erase(p);
+
+    HttpClient *request = new HttpClient();
+    std::string uri = "http://s.web2.qq.com/api/get_friend_uin2?tuin="+\
+                      temp_uin + "&verifysession=&type=1&code=&vfwebqq="+\
+                      vfwebqq;
+
+    std::list<std::string> headers;
+    headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=1");
+
+    request->setHttpHeaders(headers);
+
+    std::string result = request->requestServer(uri);
+    res->lock();
+    debug_info("GetFriendUin: %s", result.c_str());
+    try{
+
+        Json::FastWriter writer;
+        Json::Reader jsonReader;
+        Json::Value root;
+        jsonReader.parse(result, root, false);
+        int retcode = root["retcode"].asInt();
+        if ( 0 == retcode)
+        {
+            res->contacts[uin].qqnumber=  writer.write(root["result"]["account"]);
+        }
+        else
+        {
+            debug_info("Get friend uin failed with error code %d ... (%s,%d)", retcode, __FILE__, __LINE__);
+        }
+
+    }catch(...)
+    {
+        debug_error("Failed to parse json content... (%s,%d)", __FILE__, __LINE__);
+    }
+
+    res->ulock();
+}
+
 QQPlugin::GetFriendsInfo2::GetFriendsInfo2( const std::string & uin, const std::string & vfwebqq )
 {
     this-> uin = uin;
@@ -372,7 +422,7 @@ QQPlugin::GetFriendsInfo2::GetFriendsInfo2( const std::string & uin, const std::
 
 void QQPlugin::GetFriendsInfo2::run( void * ptr)
 {
-     ResourceManager *res = reinterpret_cast < ResourceManager *>(ptr);
+    ResourceManager *res = reinterpret_cast < ResourceManager *>(ptr);
     std::string temp_uin = uin;
     std::string::size_type p = temp_uin.find_last_of('\n');
     if(p != std::string::npos) temp_uin.erase(p);
@@ -385,7 +435,7 @@ void QQPlugin::GetFriendsInfo2::run( void * ptr)
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
 
     request->setHttpHeaders(headers);
-    
+
     std::string result = request->requestServer(uri);
     res->lock();
     debug_info("GetFriendsInfo: %s", result.c_str());
@@ -435,6 +485,59 @@ void QQPlugin::GetFriendsInfo2::run( void * ptr)
     res->ulock();
 }
 
+void QQPlugin::get_online_buddies()
+{
+    std::string uri ="http://d.web2.qq.com/channel/get_online_buddies2?clientid="+\
+                     clientid +"&psessionid="+ psessionid +"&t=1339907056293";
+
+    std::list<std::string> headers;
+    headers.push_back("Referer: http://d.web2.qq.com/proxy.html");
+
+    HttpClient * request = Singleton<HttpClient>::getInstance();
+
+    request->setHttpHeaders(headers);
+
+    std::string result = request->requestServer(uri);
+
+    std::cout<<result<<std::endl;
+
+    try{
+        Json::FastWriter writer;
+        Json::Reader jsonReader;
+        Json::Value root;
+        jsonReader.parse(result, root, false);
+        int retcode = root["retcode"].asInt();
+        if ( 0 == retcode)
+        {
+            for( Json::Value::iterator it = root["result"].begin();
+                 it != root["result"].end() ; it ++)
+            {
+                res ->lock();
+                std::string u= writer.write((*it)["uin"]);
+                if ( res->contacts.count(u) != 0 )
+                {
+                    res->contacts[u].status = (*it)["status"].asString();
+                    res->contacts[u].client_type = (*it)["client_type"].asInt();
+                }
+                else{
+                    debug_error("Invalid Uin ... %s ( %s, %d)", u.c_str(), __FILE__, __LINE__);
+                }
+                res->ulock();
+            }
+        }
+        else{
+            debug_error("Get online buddies failed with error code %d ... (%s,%d)", retcode, __FILE__, __LINE__);
+        }
+    }catch(...)
+    {
+        debug_error("Cant not parse json body ... (%s,%d)", \
+                    __FILE__, __LINE__);
+    }
+
+}
+
+
+
 QQPlugin::Poll2::Poll2(const std::string & data)
 {
     this->body = data;
@@ -451,7 +554,7 @@ void QQPlugin::Poll2::run( void *)
         headers.push_back("Referer: http://d.web2.qq.com/proxy.html");
 
         client->setHttpHeaders(headers);
-        
+
         std::string result = client->requestServer("http://d.web2.qq.com/channel/poll2",body);
         std::cout<<result<<std::endl;
 
@@ -465,5 +568,77 @@ void QQPlugin::Poll2::run( void *)
             break;
         }
         delete client;
+    }
+}
+
+QQPlugin::SendBuddyMessage::SendBuddyMessage(const std::string & body)
+{
+    this->body = body;
+}
+
+void QQPlugin::SendBuddyMessage::run(void * ptr)
+{
+    bool  *success =  reinterpret_cast <bool *> (ptr);
+    HttpClient * client;
+    client = new HttpClient();
+    std::list<std::string> headers;
+
+    headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=1&id=3");
+
+    client->setHttpHeaders(headers);
+
+    std::cout<<body<<std::endl;
+
+    std::string result = client->requestServer("http://d.web2.qq.com/channel/send_buddy_msg2",body);
+    std::cout<<result<<std::endl;
+
+    * success = true;
+    delete client;
+}
+
+
+bool QQPlugin::send_buddy_message(const std::string & uin, const std::string & message_body)
+{
+    try
+    {
+
+/*
+  {"to":830499684,"face":0,"content":"[\"echo\",[\"font\",
+  {\"name\":\"宋体\",\"size\":\"16\",\"style\":[0,0,0],\"color\":\"000000\"}]]","msg_id":70480002,"clientid":"8148643","psessionid":"8368046764001e636f6e6e7365727665725f77656271714031302e3132382e36362e31313200000a4000001b40026e040014b938176d0000000a406474624635533435436d00000028023b216f17c092716f816c1a19ed44ed8e4cf8fd15f99948879b435b8e2928776f7da2639a86e838"}
+
+ */
+        Json::Value root;
+        Json::Value font;
+
+        font["name"] ="宋体";
+        font["size"] ="16";
+        for( int i =0 ; i < 3 ; i ++)
+            font["style"][i] = 0;
+        font["color"] ="000000";
+
+        root["to"] = uin;
+        root["face"]=0;
+        root["content"][0] = message_body;
+        root["content"][1][0] = "font";
+        root["content"][1][1] = font;
+        root["msg_id"] = message_id ++ ;
+        root["clientid"] = clientid;
+        root["psessionid"] = psessionid;
+        Json::FastWriter writer;
+        std::string body = urlencode(  writer.write(root));
+        body +="&clientid=" + clientid + "&psessionid=" + psessionid;
+
+        bool sucess =false;
+
+        SendBuddyMessage * job= new SendBuddyMessage( body);
+
+        ThreadPool::run(job, &sucess, true);
+
+        return sucess;
+
+    }catch(...)
+    {
+        debug_error("Failt to parse json content... (%s,%d)", __FILE__, __LINE__);
+        return false;
     }
 }
