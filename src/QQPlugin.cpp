@@ -19,7 +19,7 @@
 #include "QQTypes.h"
 #include "json/writer.h"
 #include "ThreadPool.h"
-
+#include <algorithm>
 using namespace QQUtil;
 
 
@@ -578,7 +578,7 @@ QQPlugin::SendBuddyMessage::SendBuddyMessage(const std::string & body)
 
 void QQPlugin::SendBuddyMessage::run(void * ptr)
 {
-    bool  *success =  reinterpret_cast <bool *> (ptr);
+    bool  *success =  (bool*)(ptr);
     HttpClient * client;
     client = new HttpClient();
     std::list<std::string> headers;
@@ -590,10 +590,26 @@ void QQPlugin::SendBuddyMessage::run(void * ptr)
     std::cout<<body<<std::endl;
 
     std::string result = client->requestServer("http://d.web2.qq.com/channel/send_buddy_msg2",body);
-    std::cout<<result<<std::endl;
-
-    * success = true;
     delete client;
+    try{
+         Json::Reader jsonReader;
+         Json::Value root;
+         jsonReader.parse(result, root, false);
+         int ret= root["retcode"].asInt();
+         if ( ret == 0)
+         {
+             *success = true;
+             debug_info("Success to send buddy message!");
+         }
+         else
+         {
+             *success = false;
+             debug_error("Fail to send buddy message!");
+         }
+    }catch(...)
+    {
+        debug_error("fail to parse json content ...(%s,%d)", __FILE__, __LINE__);
+    }
 }
 
 
@@ -601,48 +617,62 @@ bool QQPlugin::send_buddy_message(const std::string & uin, const std::string & m
 {
     try
     {
-        /*
+
         Json::Value root;
         Json::Value font;
+        Json::Value content;
+        Json::FastWriter writer;
 
         font["name"] ="宋体";
-        font["size"] ="16";
+        font["size"] = "16";
         for( int i =0 ; i < 3 ; i ++)
             font["style"][i] = 0;
         font["color"] ="000000";
 
-        root["to"] = uin;
+        root["to"] = StrToInt(uin);
         root["face"]=0;
-        root["content"][0] = message_body;
-        root["content"][1][0] = "font";
-        root["content"][1][1] = font;
+        content[0] = message_body;
+        content[1][0]="font";
+        content[1][1] = font;
+
+        std::string str = writer.write(content);
+        size_t pos = str.find_last_of("]");
+        str.erase(str.begin()+ pos+1, str.end());
+
         root["msg_id"] = message_id ++ ;
         root["clientid"] = QQUtil::StrToInt(clientid);
         root["psessionid"] = psessionid;
-        Json::FastWriter writer;
-        std::string body = urlencode(writer.write(root));
+
+        root["content"] = str;
+        std::string body = writer.write(root);
+
+        pos = body.find_last_of("}");
+        body.erase(body.begin()+ pos+1, body.end());
+
+        size_t start_pos;
+        std::string from = "\"\\\"";
+        std::string to ="\\\"";
+
+        QQUtil::replaceAll( body, from, to);
+
+        from = "\\\"\"";
+        to = "\\\"";
+
+        QQUtil::replaceAll( body, from, to);
+
+        body = urlencode(body);
         std::string::size_type p = body.find_last_of('\n');
         if(p != std::string::npos) body.erase(p);
         body = "r=" + body;
         body +="&clientid=" + clientid + "&psessionid=" + psessionid;
-        */
-
-        std::string body="r=%7B%22to%22%3A"+ uin \
-                         +"%2C%22face%22%3A0%2C%22content%22%3A%22%5B%5C%22"+\
-                         message_body+\
-                         "%5C%5Cn%5C%22%2C%5B%5C%22font%5C%22%2C%7B%5C%22name%5C%22%3A%5C%22%E5%AE%8B%E4%BD%93%5C%22%2C%5C%22size%5C%22%3A%5C%2216%5C%22%2C%5C%22style%5C%22%3A%5B0%2C0%2C0%5D%2C%5C%22color%5C%22%3A%5C%22000000%5C%22%7D%5D%5D%22%2C%22msg_id%22%3A" + \
-                         QQUtil::IntToStr(message_id)+\
-                         "%2C%22clientid%22%3A%22"+\
-                         clientid+"%22%2C%22psessionid%22%3A%22"+\
-                         psessionid+"%22%7D&clientid="+clientid+"&psessionid="+ psessionid;
 
         message_id ++;
-        bool sucess =false;
+        bool sucess =false ;
 
         SendBuddyMessage * job= new SendBuddyMessage( body);
 
         ThreadPool::run(job, &sucess, true);
-
+        ThreadPool::sync(job);
         return sucess;
 
     }catch(...)
