@@ -130,10 +130,10 @@ struct QQGroup{
     std::string owner;
     std::string mark;
     std::string mask;
-    std::string option;
+    int option;
     std::string createtime;
     std::string gclass;
-    std::string level;
+    int level;
     std::string face;
     std::string memo;
     std::string fingermemo;

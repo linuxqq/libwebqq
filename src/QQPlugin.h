@@ -35,7 +35,7 @@ public:
     std::map<int, QQCategory> categories;
     std::map<std::string, QQGroup> groups;
     std::map<std::string, QQBuddy>  contacts;
-    std::map<std::string, std::list<QQBuddy> > group_contacts;
+    std::map<std::string, std::map<std::string, QQBuddy> > group_contacts;
     virtual ~ResourceManager();
 
     void lock();
@@ -91,6 +91,16 @@ public:
         virtual void run( void *);
     };
 
+
+    class GetGroupInfo: public ThreadPool::TPool::TJob
+    {
+        std::string gcode;
+        std::string vfwebqq;
+    public:
+        GetGroupInfo(const std::string & gcode, const std::string & vfwebqq);
+        virtual void run( void *);
+    };
+
     class Poll2:public ThreadPool::TPool::TJob
     {
         std::string body;
@@ -125,8 +135,9 @@ private:
 
     void get_group_name_list();
 
-    void get_online_buddies();
+    void get_group_info();
 
+    void get_online_buddies();
 
     void reset(){}
     ResourceManager * res;
