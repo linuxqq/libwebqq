@@ -742,26 +742,66 @@ void QQPlugin::SendBuddyMessage::run(void * ptr)
     std::string result = client->requestServer("http://d.web2.qq.com/channel/send_buddy_msg2",body);
     delete client;
     try{
-         Json::Reader jsonReader;
-         Json::Value root;
-         jsonReader.parse(result, root, false);
-         int ret= root["retcode"].asInt();
-         if ( ret == 0)
-         {
-             *success = true;
-             debug_info("Success to send buddy message!");
-         }
-         else
-         {
-             *success = false;
-             debug_error("Fail to send buddy message!");
-         }
+        Json::Reader jsonReader;
+        Json::Value root;
+        jsonReader.parse(result, root, false);
+        int ret= root["retcode"].asInt();
+        if ( ret == 0)
+        {
+            *success = true;
+            debug_info("Success to send buddy message!");
+        }
+        else
+        {
+            *success = false;
+            debug_error("Fail to send buddy message!");
+        }
     }catch(...)
     {
         debug_error("fail to parse json content ...(%s,%d)", __FILE__, __LINE__);
     }
 }
 
+QQPlugin::SendGroupMessage::SendGroupMessage(const std::string & body )
+{
+    this->body = body;
+}
+
+void QQPlugin::SendGroupMessage::run( void *ptr)
+{
+     bool  *success =  (bool*)(ptr);
+    HttpClient * client;
+    client = new HttpClient();
+    std::list<std::string> headers;
+
+    headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=1&id=2");
+
+    client->setHttpHeaders(headers);
+
+    std::cout<<body<<std::endl;
+
+    std::string result = client->requestServer("http://d.web2.qq.com/channel/send_qun_msg2",body);
+    delete client;
+    try{
+        Json::Reader jsonReader;
+        Json::Value root;
+        jsonReader.parse(result, root, false);
+        int ret= root["retcode"].asInt();
+        if ( ret == 0)
+        {
+            *success = true;
+            debug_info("Success to send buddy message!");
+        }
+        else
+        {
+            *success = false;
+            debug_error("Fail to send buddy message!");
+        }
+    }catch(...)
+    {
+        debug_error("fail to parse json content ...(%s,%d)", __FILE__, __LINE__);
+    }
+}
 
 bool QQPlugin::send_buddy_message(const std::string & uin, const std::string & message_body)
 {
@@ -819,6 +859,101 @@ bool QQPlugin::send_buddy_message(const std::string & uin, const std::string & m
         bool sucess =false ;
 
         SendBuddyMessage * job= new SendBuddyMessage( body);
+
+        ThreadPool::run(job, &sucess, true);
+        ThreadPool::sync(job);
+        return sucess;
+
+    }catch(...)
+    {
+        debug_error("Failt to parse json content... (%s,%d)", __FILE__, __LINE__);
+        return false;
+    }
+}
+
+
+bool QQPlugin::send_group_message(const std::string & group_class, const std::string & message_body)
+{
+    res->lock();
+    bool exists = false;
+    std::string g_uin ;
+    for ( std::map<std::string , QQGroup>::iterator it = res->groups.begin() ;
+          it != res->groups.end();  it ++)
+    {
+        std::string g_class = it -> first;
+        std::string::size_type p = g_class.find_last_of('\n');
+        if(p != std::string::npos) g_class.erase(p);
+
+        if ( g_class == group_class)
+        {
+            exists = true;
+            g_uin = it->second.gid;
+            std::string::size_type p = g_uin.find_last_of('\n');
+            if(p != std::string::npos) g_uin.erase(p);
+        }
+    }
+    if ( ! exists)
+    {
+        debug_error("Invalid group class string... (%s,%d)", __FILE__, __LINE__);
+        res->ulock();
+        return false;
+    }
+    res->ulock();
+
+    try
+    {
+
+        Json::Value root;
+        Json::Value font;
+        Json::Value content;
+        Json::FastWriter writer;
+
+        font["name"] ="宋体";
+        font["size"] = "16";
+        for( int i =0 ; i < 3 ; i ++)
+            font["style"][i] = 0;
+        font["color"] ="000000";
+
+        root["group_uin"] = g_uin;
+        root["face"]=0;
+        content[0] = message_body;
+        content[1][0]="font";
+        content[1][1] = font;
+
+        std::string str = writer.write(content);
+        size_t pos = str.find_last_of("]");
+        str.erase(str.begin()+ pos+1, str.end());
+
+        root["msg_id"] = message_id ++ ;
+        root["clientid"] = QQUtil::StrToInt(clientid);
+        root["psessionid"] = psessionid;
+
+        root["content"] = str;
+        std::string body = writer.write(root);
+
+        pos = body.find_last_of("}");
+        body.erase(body.begin()+ pos+1, body.end());
+
+        size_t start_pos;
+        std::string from = "\"\\\"";
+        std::string to ="\\\"";
+
+        QQUtil::replaceAll( body, from, to);
+
+        from = "\\\"\"";
+        to = "\\\"";
+
+        QQUtil::replaceAll( body, from, to);
+
+        body = urlencode(body);
+        std::string::size_type p = body.find_last_of('\n');
+        if(p != std::string::npos) body.erase(p);
+        body = "r=" + body;
+        body +="&clientid=" + clientid + "&psessionid=" + psessionid;
+
+        bool sucess =false ;
+
+        SendGroupMessage * job= new SendGroupMessage( body);
 
         ThreadPool::run(job, &sucess, true);
         ThreadPool::sync(job);

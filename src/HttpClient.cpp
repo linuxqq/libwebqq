@@ -207,7 +207,7 @@ std::string HttpClient::requestServer(const std::string & uri, const std::string
 
         perform();
         result = mWriterChunk.getContent();
-        debug_info("Result:%s", result.c_str());
+        //debug_info("Result:%s", result.c_str());
         return result;
     }
     while(0);

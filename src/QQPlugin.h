@@ -118,9 +118,19 @@ public:
         virtual void run(void *);
     };
 
+    class SendGroupMessage: public ThreadPool::TPool::TJob
+    {
+        std::string body;
+    public:
+        SendGroupMessage( const std::string & body);
+        virtual void run( void *);
+    };
+
     bool  webqq_login( const std::string &uin, const std::string & password, const std::string & status="online");
 
     bool send_buddy_message(const std::string & uin, const std::string & message_body );
+
+    bool send_group_message( const std::string & group_class , const std::string & message_body);
 
     //bool send_group_message(const std::string & uin, const std::string & message_body);
 
