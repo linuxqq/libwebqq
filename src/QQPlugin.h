@@ -36,6 +36,9 @@ public:
     std::map<std::string, QQGroup> groups;
     std::map<std::string, QQBuddy>  contacts;
     std::map<std::string, std::map<std::string, QQBuddy> > group_contacts;
+
+    Adapter event_adapter;
+
     virtual ~ResourceManager();
 
     void lock();

@@ -14,7 +14,7 @@
 #include <list>
 #include "Singleton.h"
 
-enum  Event{
+enum  QQEvent{
     ON_RECEIVE_MESSAGE = 512,
     ON_SEND_MESSAGE,
     ON_RECEIVE_AVATAR,
