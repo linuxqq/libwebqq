@@ -1,7 +1,7 @@
 /**
  * @file   testthreadpool.cpp
  * @author Xiang Wang <xiang_wang@trendmicro.com.cn>
- * @date   Wed Jun  6 09:47:05 2012
+ * @date   Fri Jun 22 20:03:45 2012
  *
  * @brief
  *
@@ -11,6 +11,7 @@
 #include "ThreadPool.h"
 #include <iostream>
 #include <cstdlib>
+#include <unistd.h>
 
 static int status = 1;
 

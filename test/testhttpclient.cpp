@@ -1,7 +1,7 @@
 /**
  * @file   testhttpclient.cpp
  * @author Xiang Wang <xiang_wang@trendmicro.com.cn>
- * @date   Wed May 30 19:33:37 2012
+ * @date   Fri Jun 22 20:03:45 2012
  *
  * @brief
  *
@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <unistd.h>
 #include "QQAuthentication.h"
 #include "json/json.h"
 #include "QQDebug.h"
