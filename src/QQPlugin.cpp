@@ -143,7 +143,7 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
             std::cout<<body<<std::endl;
 
             Poll2 * poll = new Poll2(body );
-            ThreadPool::run(poll, NULL, true);
+            ThreadPool::run(poll, res, true);
 
         }
         else
@@ -693,8 +693,9 @@ QQPlugin::Poll2::Poll2(const std::string & data)
     this->body = data;
 }
 
-void QQPlugin::Poll2::run( void *)
+void QQPlugin::Poll2::run( void * ptr)
 {
+    ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
     while(1)
     {
         HttpClient * client;
@@ -707,17 +708,35 @@ void QQPlugin::Poll2::run( void *)
 
         std::string result = client->requestServer("http://d.web2.qq.com/channel/poll2",body);
         std::cout<<result<<std::endl;
-
+        delete client;
         Json::Reader jsonReader;
         Json::Value root;
         jsonReader.parse(result, root, false);
         int ret= root["retcode"].asInt();
-        if ( ret == 103)
+        if ( ret == 102 )
         {
-            debug_info("lost connection.");
+            continue;
+        }
+        else if ( ret == 103)
+        {
+            debug_error("lost connection.");
             break;
         }
-        delete client;
+        else if (ret == 0 )
+        {
+            std::string poll_type = root["result"][0]["poll_type"].asString();
+            if ( poll_type == "message")
+            {
+                if ( res->event_adapter.is_event_registered(ON_RECEIVE_MESSAGE) )
+                {
+                    res->event_adapter.trigger(ON_RECEIVE_MESSAGE , root["result"][0]["Value"].asString());
+                }
+                else
+                {
+                    debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+                }
+            }
+        }
     }
 }
 

@@ -12,52 +12,46 @@
 #define __ACTION_H__
 #include <map>
 #include "QQTypes.h"
-
-template<class T>
+#include <iostream>
+#include "SmartPtr.h"
+#include <string>
 class Action
 {
-    T  data;
+    std::string data;
 public:
-    typedef  T DataType;
     virtual void run()=0;
-    virtual ~Action(){}
-    virtual void load(T data){
+    Action (){
+        n_actions++;
+    }
+    virtual void load(const std::string & data)
+    {
         this->data = data;
     }
+
+    virtual ~Action(){ std::cout<<"Destruct Action"<<std::endl; n_actions --; }
+    static int n_actions;
 };
 
-template<class T>
 class Caller {
 private:
-    Action<T> *_callback;
+    Action *_callback;
 public:
     Caller(): _callback(0) {}
     ~Caller() { delAction(); }
     void delAction() { delete _callback; _callback = 0; }
-    void setAction(Action<T> *cb) { delAction(); _callback = cb; }
+    void setAction(Action*cb) { delAction(); _callback = cb; }
     void call() { if (_callback)  _callback -> run() ;}
 };
 
 class Adapter{
-    std::map<QQEvent, void *> event_map;
+    std::map<QQEvent, SmartPtr<Action> > event_map;
+
 public:
     Adapter();
     ~Adapter();
-    template<class T>
-    void trigger(QQEvent event, T data){
-        if ( event_map.count( event) == 0)
-        {
-            return;
-        }
-        else{
-            Action<T> * ptr = reinterpret_cast<Action<T> >(event_map[event]);
-            ptr->load(data);
-            Caller<T> caller ;
-            caller.setAction(ptr);
-            caller.call();
-        }
-    }
-    void register_event_handler(QQEvent event, void * action);
-    void delete_event_hander(QQEvent event);
+    void trigger( const QQEvent &event, const std::string data);
+    void register_event_handler(QQEvent event, SmartPtr<Action> action);
+    bool is_event_registered(const QQEvent & event);
+    void delete_event_handler(QQEvent event);
 };
 #endif
