@@ -1,5 +1,6 @@
 AC_PREREQ([2.6])
 AC_INIT([LinuxQQ], [0.2], [wxjeacen@gmail.com], [LinuxQQ], [https://github.com/gtkqq/gtkqq])
+m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror])
