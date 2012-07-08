@@ -1,5 +1,8 @@
 %module (directors="1") libwebqqpython
 %{
+#define SWIG_FILE_WITH_INIT
+#include <boost/shared_ptr.hpp>
+#include <sstream>
 #include <stdio.h>
 #include <Action.h>
 #include <QQTypes.h>
@@ -35,3 +38,4 @@ namespace std{
 %template(pymap) std::map<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject>;
 
 %template(ActionPtr) SmartPtr<Action>;
+%include "callbackXYZ.i"
