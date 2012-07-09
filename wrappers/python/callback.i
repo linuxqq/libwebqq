@@ -1,54 +1,3 @@
-/*
-  Typemaps to wrap boost::function.
-
-  IN typemap (Python callable case)
-  ----------
-
-  In order to convert a Python callable to a boost::function, we first wrapper the
-  Python callable into a C++ callable (we do this by instantiating a Functor and
-  make its operator() method call the Python callable), then create a
-  boost::function using this Functor.
-
-  Python callable
-  ^      
-  |      
-  FunctorXYZ
-  ^      
-  |      
-  boost::function
-
-  OUT typemap
-  -----------
-
-  To convert a boost::function to a Python callable, we make use of a dedicated 
-  Python type, BoostFunction_DDD_retD. This Python object is just a callable 
-  (ie has a C/C++ function in its tp_call slot). BoostFunction_DDD_retD store the
-  boost::function in its member attribute 'cb', which is called when its tp_call
-  function is invoked.
-
-  boost::function
-  ^
-  |
-  BoostFunction_DDD_retD 
-
-
-  IN typemap (C++ wrapped callable case)
-  ---------- 
-
-  If now we pass a BoostFunction_DDD_retD to a C++ function that take a
-  boost::fucntion as argument, we just extract the cb member which
-  is a boost::function and pass it to the C++ function.
-*/
-
-/*==============================================================================
-  Functor classes
-  ==============================================================================*/
-
-/*
-  In order to pass a Python callable to a C++ function that take a boost::function
-  as argument, we instantiate a C++ Functor and make it call the Python callable.
-*/
-
 %fragment("PyCallbackError","header") {
     /*
       C++ exception to be raised if call to Python callable fails.
@@ -88,9 +37,8 @@
         ~Functor(){ } 
         
         void operator() (std::string str ) const{
-
-            PyObject *pyarglist = Py_BuildValue("(%s)", str.c_str());
-            PyObject_callObject(_pycallable, pyarglist);
+            PyObject *pyarglist = Py_BuildValue("(s)", str.c_str());
+            PyObject_CallObject(_pycallable, pyarglist);
             return;
         }
         
@@ -110,24 +58,11 @@
   ==============================================================================*/
 
 %fragment("BoostFunction_S_retV","header") {
-    /*
-      Python type to wrap boost::function
-
-      It has a cb member that store a boost::function when getting a C++
-      boost::function into Python.
-
-      When giving this Python type as an C++ boost::function function argument,
-      the cb member is just passed.
-
-      This object has a tp_call method (the function invoked when the object is 
-      called from Python) that calls the boost::function member.
-    */
-
     typedef struct {
         PyObeject_HEAD
         ternaryfunc tp_call;
         boost::function<void (std::string)> * cb;
-    } boostFunction_BoostFunction_VS_retV_Object;
+    } boostFunction_BoostFunction_S_retV_Object;
 
     static PyObject *
         boostfunction_call_S_retV(
@@ -151,7 +86,7 @@
     static PyTypeObject boostFunction_BoostFunction_S_retV_Type ={
         PyObject_HEAD_INIT(NULL)
         0,                         /*ob_size*/
-        "demo.BoostFunction_S_retV",   /*tp_name*/
+        "libwebqqpython.BoostFunction_S_retV",   /*tp_name*/
         sizeof(boostFunction_BoostFunction_S_retV_Object), /*tp_basicsize*/
         0,                         /*tp_itemsize*/
         0,                         /*tp_dealloc*/
@@ -179,11 +114,8 @@
   Typemaps for IN const Callback &
   ==============================================================================*/
 
-%typemap(in,fragment="Functor,BoostFunction_S_retV") const EventListerner & {
-
-    /* is the Python argument a boost::function<double (double,double,double)>
-     * wrapper?
-     */
+%typemap(in,fragment="Functor,BoostFunction_S_retV") const EventListener & {
+    
     if (PyType_IsSubtype($input->ob_type, &boostFunction_BoostFunction_S_retV_Type)) {
         $1 = new EventListener();
         $1 = ((boostFunction_BoostFunction_S_retV_Object*)$input)->cb;
@@ -194,28 +126,13 @@
             PyErr_SetString(PyExc_TypeError, "argument must be callable");
             return NULL;
         }
-        /*
-          Examples of others tests that we can NOT perform:
-          - inspect.getargspec($input): works only for function, not functor.
-          - calling the function with arbitrary args to detect an error sooner:
-          If the call modify attributes of a functor, second call may produce wrong results.
-          Anyway, Python callable could be modified inplace beetween this check and
-          its really call.
-        */
-
-        /* 
-         * boost::function FcuntorXYZ is responsible to delete the Python callable 
-         * wrapper FunctorXYZ.
-         * So we need a smart pointer.
-         */
+      
         boost::shared_ptr<Functor> fxyz_ptr( new Functor() );
-
+        
         /*
          * Configure our C++ Functor to call Python callable
          */
         fxyz_ptr->setPyFunc($input);
-
-       
         /*
          * Make a boost::function with our C++ Functor
          */
@@ -224,11 +141,7 @@
 
  }
 
-/*==============================================================================
-
-  ==============================================================================*/
-
-%typemap(out,fragment="Functor,BoostFunction_S_retV") EventListerner & {
+%typemap(out,fragment="Functor,BoostFunction_S_retV") EventListener & {
     /* instantiate a boostFunction_BoostFunction_DDD_retD_Object and store
        the boost::function in it */
 
@@ -246,10 +159,6 @@
     $result = (PyObject*) boostfunc;
  }
 
-/*==============================================================================
-
-  ==============================================================================*/
-
-%typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) const EventListerner & {
+%typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) const EventListener & {
     $1 = PyCallable_Check($input) ? 1 : 0;
  }

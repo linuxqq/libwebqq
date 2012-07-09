@@ -11,6 +11,7 @@
 #include <json/json.h>
 #include <SmartPtr.h>
 %}
+
 %include "Action.h"
 %include stl.i
 %include "std_string.i"
@@ -37,7 +38,4 @@ namespace std{
 %template() std::pair<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject>;
 %template(pymap) std::map<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject>;
 
-//%template(ActionPtr) SmartPtr<Action>;
-
-
-%include "callback.i"
+%import "callback.i"
