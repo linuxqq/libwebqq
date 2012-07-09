@@ -2,16 +2,17 @@
 
 from libwebqqpython import *
 
-class OnMessage(Action):
+class OnMessage():
 
     func = None
     
-    def __init__( self, func):
+    def __init__( self):
         #Action.__init__(self)
-        self.func = func
+        #self.func = func
+        pass
         
-    def run(self):
-        print self.data
+    def __call__(self,data):
+        print data
 
 class Worker:
     plugin = None
@@ -22,7 +23,9 @@ class Worker:
         self.plugin = SingletonQQPlugin_getInstance()
         self.res = SingletonResourceManager_getInstance()
         self.res.lock()
-        self.register_handler(ON_RECEIVE_MESSAGE, self.on_message)
+	f = OnMessage()
+
+        self.register_handler(ON_RECEIVE_MESSAGE, f)
         self.res.ulock()
         if not self.res.event_adapter.is_event_registered(ON_RECEIVE_MESSAGE) :
             print "Fail to register event"
@@ -30,14 +33,11 @@ class Worker:
     def login(self):
         self.plugin.webqq_login("1421032531","1234567890")
     def register_handler(self, event, func):
-        
-        p_action =  OnMessage(func)
-        action = ActionPtr(id(p_action))
         adapter = self.res.event_adapter
         print adapter
-        adapter.register_event_handler(event, action)
-    def on_message(self):
-        print "test on_message"
+        adapter.register_event_handler(event, func)
+    def on_message(self,data):
+        print "test on_message " + data 
 
 worker = Worker()
 worker.login()

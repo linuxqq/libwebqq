@@ -35,21 +35,22 @@ void Adapter::trigger( const QQEvent &event, const std::string data)
         debug_error("Event is not registered ... (%s,%d)", __FILE__, __LINE__ );
         return;
     }
-    SmartPtr<Action> ptr = event_map[event];
-    ptr->load(data);
-    ptr->run();
+    Action action = event_map[event];
+    Caller caller ;
+    caller.setAction(&action);
+    caller.call(data);
 }
 
-void Adapter::register_event_handler(QQEvent event, SmartPtr<Action> action)
+void Adapter::register_event_handler(QQEvent event, EventListener el)
 {
     if ( event_map.count(event) != 0 )
     {
         debug_info("An event handler has been loaded, reload new handler. (%s,%d)", __FILE__, __LINE__);
         //delete event_map[event];
-        event_map[event] = action;
+        event_map[event] = Action(el);
         return ;
     }
-    event_map[event] = action;
+    event_map[event] = Action(el);
     debug_info("Size of event map is %d", event_map.size());
     debug_info("Register event handler success. (%s,%d)", __FILE__, __LINE__);
 }
@@ -67,10 +68,9 @@ void Adapter::delete_event_handler(QQEvent event)
         return ;
     }
 
-    std::map<QQEvent, SmartPtr<Action> >::iterator it;
+    std::map<QQEvent, Action>::iterator it;
     it = event_map.find(event);
     //delete it->second;
-    it->second = NULL;
     event_map.erase(it);
     debug_info("Delete event handler success. (%s,%d)", __FILE__, __LINE__);
 }

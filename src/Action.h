@@ -15,17 +15,26 @@
 #include <iostream>
 #include "SmartPtr.h"
 #include <string>
+
 class Action
 {
-    std::string data;
+
+    EventListener _callback;
+
 public:
-    virtual void run()=0;
     Action (){
         n_actions++;
     }
-    virtual void load(const std::string & data)
-    {
-        this->data = data;
+
+    Action(const EventListener & cb ){
+        setCallback(cb);
+    }
+
+    virtual void operator()(std::string data) {
+        _callback(data);
+    }
+    void setCallback(const EventListener & cb){
+        _callback = cb;
     }
 
     virtual ~Action(){ std::cout<<"Destruct Action"<<std::endl; n_actions --; }
@@ -34,23 +43,28 @@ public:
 
 class Caller {
 private:
+
     Action *_callback;
+
 public:
     Caller(): _callback(0) {}
     ~Caller() { delAction(); }
     void delAction() { delete _callback; _callback = 0; }
+
     void setAction(Action*cb) { delAction(); _callback = cb; }
-    void call() { if (_callback)  _callback -> run() ;}
+
+    void call(const std::string & data ) { if (_callback)  (*_callback)(data) ;}
 };
 
 class Adapter{
-    std::map<QQEvent, SmartPtr<Action> > event_map;
+
+    std::map<QQEvent, Action > event_map;
 
 public:
     Adapter();
     ~Adapter();
     void trigger( const QQEvent &event, const std::string data);
-    void register_event_handler(QQEvent event, SmartPtr<Action> action);
+    void register_event_handler(QQEvent event, EventListener callback);
     bool is_event_registered(const QQEvent & event);
     void delete_event_handler(QQEvent event);
 };

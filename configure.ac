@@ -32,7 +32,7 @@ if test $SWIGPROG = "MISSING"; then
 fi
 
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdint.h\
-                                       stdlib.h string.h sys/ioctl.h sys/socket.h unistd.h zlib.h])
+                                       stdlib.h string.h sys/ioctl.h sys/socket.h unistd.h zlib.h boost/shared_ptr.hpp boost/function.hpp])
 
 PKG_CHECK_MODULES(SQLITE3, [sqlite3 > 3.3], [
             AC_DEFINE(USE_SQLITE3, 1, [Use sqlite3])

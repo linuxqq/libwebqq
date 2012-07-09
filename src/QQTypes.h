@@ -13,6 +13,9 @@
 #include <string>
 #include <list>
 #include "Singleton.h"
+#include <boost/function.hpp>
+
+typedef boost::function<void (std::string)> EventListener;
 
 enum  QQEvent{
     ON_RECEIVE_MESSAGE = 512,

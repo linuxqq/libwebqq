@@ -37,5 +37,7 @@ namespace std{
 %template() std::pair<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject>;
 %template(pymap) std::map<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject>;
 
-%template(ActionPtr) SmartPtr<Action>;
-%include "callbackXYZ.i"
+//%template(ActionPtr) SmartPtr<Action>;
+
+
+%include "callback.i"

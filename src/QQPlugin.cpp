@@ -23,6 +23,8 @@
 using namespace QQUtil;
 
 
+int QQPlugin::message_id = 70480000;
+
 ResourceManager::ResourceManager()
 {
     rw_mutex = ( pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;

@@ -156,7 +156,4 @@ private:
     ResourceManager * res;
 
 };
-
-int QQPlugin::message_id = 70480000;
-
 #endif
