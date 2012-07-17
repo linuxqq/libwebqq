@@ -29,6 +29,9 @@ namespace QQUtil{
 
     bool replace(std::string& str, const std::string& from, const std::string& to);
     void replaceAll(std::string& str, const std::string& from, const std::string& to);
+
+    std::string trim(std::string str);
+
 };
 
 #endif

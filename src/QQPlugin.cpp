@@ -239,13 +239,13 @@ void QQPlugin::parse_user_friends(const Json::Value & root)
         {
             QQBuddy buddy;
             buddy.cate_index = (*it)["categories"].asInt();
-            buddy.uin = writer.write((*it)["uin"]);
+            buddy.uin = QQUtil::trim(writer.write((*it)["uin"]));
             res->contacts[buddy.uin] = buddy;
         }
 
         for( Json::Value::iterator it = vipinfo.begin(); it != vipinfo.end(); it ++)
         {
-            std::string u = writer.write((*it)["u"]);
+            std::string u = QQUtil::trim(writer.write((*it)["u"]));
             if( res->contacts.count(u) == 0 )
             {
                 debug_error("uin %s  does not exist ... (%s,%d)", u.c_str(),
@@ -298,9 +298,9 @@ void QQPlugin::get_group_name_list()
             {
                 QQGroup group;
                 group.name = writer.write((*it)["name"]);
-                group.gid = writer.write((*it)["gid"]);
+                group.gid = QQUtil::trim(writer.write((*it)["gid"]));
                 group.flag = writer.write((*it)["flag"]);
-                group.code = writer.write((*it)["code"]);
+                group.code = QQUtil::trim(writer.write((*it)["code"]));
                 res->groups[group.code]= group;
             }
             if ( res->groups.empty())
@@ -407,7 +407,7 @@ void QQPlugin::GetFriendUin::run( void * ptr)
         int retcode = root["retcode"].asInt();
         if ( 0 == retcode)
         {
-            res->contacts[uin].qqnumber=  writer.write(root["result"]["account"]);
+            res->contacts[uin].qqnumber=  QQUtil::trim(writer.write(root["result"]["account"]));
         }
         else
         {
@@ -521,10 +521,10 @@ void QQPlugin::get_online_buddies()
                  it != root["result"].end() ; it ++)
             {
                 res ->lock();
-                std::string u= writer.write((*it)["uin"]);
+                std::string u= QQUtil::trim(writer.write((*it)["uin"]));
                 if ( res->contacts.count(u) != 0 )
                 {
-                    res->contacts[u].status = (*it)["status"].asString();
+                    res->contacts[u].status = QQUtil::trim((*it)["status"].asString());
                     res->contacts[u].client_type = (*it)["client_type"].asInt();
                 }
                 else{
@@ -577,7 +577,7 @@ void QQPlugin::GetGroupInfo::run( void *ptr)
         if ( 0 == retcode)
         {
             res->lock();
-            res->groups[gcode].memo = root["result"][0]["memo"].asString();
+            res->groups[gcode].memo = QQUtil::trim(root["result"][0]["memo"].asString());
             res->ulock();
         }
         else{
@@ -611,16 +611,16 @@ void QQPlugin::GetGroupInfo::run( void *ptr)
         {
             res->lock();
             Json::Value ginfo = root["result"]["ginfo"];
-            gcode = writer.write(ginfo["code"]);
+            gcode = QQUtil::trim( writer.write(ginfo["code"]));
             if ( res->groups.count(gcode) == 0)
             {
                 debug_error( "invalid group code. ...(%s,%d)", __FILE__, __LINE__);
             }
-            res->groups[gcode].gid = writer.write(ginfo["gid"]);
+            res->groups[gcode].gid = QQUtil::trim(writer.write(ginfo["gid"]));
             res->groups[gcode].level = ginfo["level"].asInt();
             res->groups[gcode].fingermemo = ginfo["fingermemo"].asString();
             res->groups[gcode].flag = writer.write(ginfo["flag"]);
-            res->groups[gcode].gclass = writer.write(ginfo["class"]);
+            res->groups[gcode].gclass = QQUtil::trim(writer.write(ginfo["class"]));
             res->groups[gcode].name = writer.write(ginfo["name"]);
             res->groups[gcode].owner = writer.write(ginfo["owner"]);
             res->groups[gcode].option = ginfo["option"].asInt();
@@ -628,7 +628,7 @@ void QQPlugin::GetGroupInfo::run( void *ptr)
             Json::Value minfo = root["result"]["minfo"];
             for ( Json::Value::iterator it = minfo.begin(); it != minfo.end() ; it ++)
             {
-                std::string uin = writer.write((*it)["uin"]);
+                std::string uin = QQUtil::trim( writer.write((*it)["uin"]));
                 QQBuddy buddy;
                 buddy.uin = uin;
                 buddy.city = (*it)["city"].asString();
@@ -641,7 +641,7 @@ void QQPlugin::GetGroupInfo::run( void *ptr)
             Json::Value status = root["result"]["status"];
             for ( Json::Value::iterator it = status.begin(); it != status.end() ; it ++)
             {
-                std::string uin = writer.write((*it)["uin"]);
+                std::string uin = QQUtil::trim(writer.write((*it)["uin"]));
                 if ( res->group_contacts[gcode].count(uin) == 0)
                 {
                     debug_error("Invalid group member uin ... (%s,%d)", __FILE__, __LINE__);

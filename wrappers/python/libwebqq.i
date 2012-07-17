@@ -13,6 +13,7 @@
 %}
 
 %include "Action.h"
+%include "callback.i"
 %include stl.i
 %include "std_string.i"
 %include "std_map.i"
@@ -38,4 +39,3 @@ namespace std{
 %template() std::pair<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject>;
 %template(pymap) std::map<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject>;
 
-%import "callback.i"

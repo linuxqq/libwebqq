@@ -145,4 +145,10 @@ namespace QQUtil{
             start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
         }
     }
+
+    std::string  trim(std::string str){
+        std::string::size_type p = str.find_last_of('\n');
+        if(p != std::string::npos) str.erase(p);
+        return str;
+    }
 };
