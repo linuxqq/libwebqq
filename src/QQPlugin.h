@@ -16,7 +16,7 @@
 #include <map>
 #include <string>
 #include <list>
-
+#include <queue>
 #include<pthread.h>
 
 #include "QQTypes.h"
@@ -28,7 +28,7 @@ struct ResourceManager:Singleton<ResourceManager>
 
     ResourceManager();
     friend class Singleton<ResourceManager>;
-    pthread_mutex_t rw_mutex ;
+    ThreadPool::TMutex rw_mutex;
 
     void reset(){ }
 public:
@@ -36,7 +36,9 @@ public:
     std::map<std::string, QQGroup> groups;
     std::map<std::string, QQBuddy>  contacts;
     std::map<std::string, std::map<std::string, QQBuddy> > group_contacts;
-
+//#ifdef USE_EVENT_QUEUE
+    std::list<std::pair<int,std::string> > event_queue;
+//#endif
     Adapter event_adapter;
 
     virtual ~ResourceManager();

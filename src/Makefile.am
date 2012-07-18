@@ -1,5 +1,5 @@
 lib_LTLIBRARIES=libwebqq.la
-libwebqq_la_CPPFLAGS=-I../jsoncpp/include $(CURL_CFLAGS) 
+libwebqq_la_CPPFLAGS=-I../jsoncpp/include $(CURL_CFLAGS) $(CFLAGS)
 libwebqq_la_LIBADD=$(CURL_LIBS) -L../jsoncpp/src/ -ljsoncpp
 libwebqq_la_SOURCES= Thread.h Thread.cpp \
 		     ThreadPool.h ThreadPool.cpp\

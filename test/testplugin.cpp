@@ -14,13 +14,13 @@ int main()
 {
     QQPlugin * plugin = Singleton<QQPlugin>::getInstance();
     plugin->webqq_login("1421032531", "1234567890");
-
+/*
     if (plugin->send_buddy_message("553934476","fuck") )
     {
         debug_info("Success!");
     }
     else
         debug_error("Fail");
-    /*553934476*/
+*/
     delete plugin;
 }

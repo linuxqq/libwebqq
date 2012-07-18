@@ -6,6 +6,7 @@ libwebqqpython = Extension(
 	sources = ['libwebqq.i',],
 	include_dirs = ['../../src','../../jsoncpp/include'],
 	libraries =['curl'],
+	define_macros=[('USE_EVENT_QUEUE', None),],
 	extra_link_args= ['../../src/.libs/libwebqq.a',
 	   		  '../../jsoncpp/src/libjsoncpp.a',],
 	swig_opts = ['-modern' ,'-c++','-I../../src','-I../../jsoncpp/include',],

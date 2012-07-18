@@ -21,6 +21,8 @@ enum  QQEvent{
     ON_RECEIVE_MESSAGE = 512,
     ON_SEND_MESSAGE,
     ON_RECEIVE_AVATAR,
+    ON_BUDDY_STATUS_CHANGE,
+    ON_SHAKE_MESSAGE
 };
 
 enum QQReturnCode{
@@ -118,10 +120,6 @@ struct QQCategory{
     std::string name;
     int index;
 };
-inline bool operator<( const QQCategory & cate1, const QQCategory & cate2)
-{
-    return cate1.index < cate2.index;
-}
 
 
 struct QQGroup{
@@ -141,10 +139,6 @@ struct QQGroup{
     std::string memo;
     std::string fingermemo;
 };
-
-inline bool operator<(const QQGroup & group1, const QQGroup & group2){
-        return group1.gid < group2.gid;
-}
 
 struct QQConfig:public Singleton<QQConfig>
 {

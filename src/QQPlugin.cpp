@@ -27,7 +27,12 @@ int QQPlugin::message_id = 70480000;
 
 ResourceManager::ResourceManager()
 {
-    rw_mutex = ( pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
+
+#ifdef USE_EVENT_QUEUE
+    debug_info("Use event queue");
+#else
+    debug_info("Not use event queue");
+#endif
 }
 
 ResourceManager::~ResourceManager()
@@ -37,12 +42,12 @@ ResourceManager::~ResourceManager()
 
 void ResourceManager::lock()
 {
-    pthread_mutex_lock(&rw_mutex);
+    rw_mutex.lock();
 }
 
 void ResourceManager::ulock()
 {
-    pthread_mutex_unlock(&rw_mutex);
+    rw_mutex.unlock();
 }
 
 
@@ -366,9 +371,11 @@ void QQPlugin::GetLongNick::run(void *ptr)
 
     }catch(...)
     {
+        res->ulock();
         debug_error("Failed to parse json content... (%s,%d)", __FILE__, __LINE__);
     }
     res->ulock();
+
     delete request;
 }
 
@@ -416,6 +423,7 @@ void QQPlugin::GetFriendUin::run( void * ptr)
 
     }catch(...)
     {
+        res->ulock();
         debug_error("Failed to parse json content... (%s,%d)", __FILE__, __LINE__);
     }
 
@@ -445,10 +453,10 @@ void QQPlugin::GetFriendsInfo2::run( void * ptr)
     request->setHttpHeaders(headers);
 
     std::string result = request->requestServer(uri);
-    res->lock();
     debug_info("GetFriendsInfo: %s", result.c_str());
     try
     {
+        res->lock();
         Json::FastWriter writer;
         Json::Reader jsonReader;
         Json::Value root;
@@ -483,14 +491,14 @@ void QQPlugin::GetFriendsInfo2::run( void * ptr)
         {
             debug_info("Get friends info2 failed with error code %d ... (%s,%d)", retcode, __FILE__, __LINE__);
         }
+        res->ulock();
 
     }catch(...)
     {
+        res->ulock();
         debug_error("Cant not parse json body ... (%s,%d)", \
                     __FILE__, __LINE__);
     }
-
-    res->ulock();
 }
 
 void QQPlugin::get_online_buddies()
@@ -669,6 +677,7 @@ void QQPlugin::GetGroupInfo::run( void *ptr)
         }
     }catch(...)
     {
+        res->ulock();
         debug_error("Cant not parse json body ... (%s,%d)", \
                     __FILE__, __LINE__);
     }
@@ -688,8 +697,8 @@ void QQPlugin::get_group_info()
         GetGroupInfo * job = new GetGroupInfo( (*it).first, vfwebqq);
         ThreadPool::run( job, res, true);
     }
-
 }
+
 QQPlugin::Poll2::Poll2(const std::string & data)
 {
     this->body = data;
@@ -697,7 +706,6 @@ QQPlugin::Poll2::Poll2(const std::string & data)
 
 void QQPlugin::Poll2::run( void * ptr)
 {
-    ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
     while(1)
     {
         HttpClient * client;
@@ -726,18 +734,49 @@ void QQPlugin::Poll2::run( void * ptr)
         }
         else if (ret == 0 )
         {
-            std::string poll_type = root["result"][0]["poll_type"].asString();
-            if ( poll_type == "message")
+            ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
+            debug_info("Result Size : %d", root["result"].size());
+            res->lock();
+
+            for ( Json::Value::iterator iter = root["result"].begin() ; iter != root["result"].end() ; iter ++ )
             {
-                if ( res->event_adapter.is_event_registered(ON_RECEIVE_MESSAGE) )
+
+                Json::FastWriter writer;
+                std::string value = QQUtil::trim(writer.write((*iter)["value"]));
+
+                std::string poll_type  = (*iter)["poll_type"].asString();
+                if ( poll_type == "message")
                 {
-                    res->event_adapter.trigger(ON_RECEIVE_MESSAGE , root["result"][0]["Value"].asString());
+#ifdef USE_EVENT_QUEUE
+                    res->event_queue.push_back(std::make_pair<QQEvent, std::string>(ON_RECEIVE_MESSAGE, value));
+#endif
+                    if ( res->event_adapter.is_event_registered(ON_RECEIVE_MESSAGE) )
+                    {
+                        res->event_adapter.trigger(ON_RECEIVE_MESSAGE ,value);
+                    }
+                    else
+                    {
+                        debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+                    }
                 }
-                else
+
+                else if (poll_type == "buddies_status_change")
                 {
-                    debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+#ifdef USE_EVENT_QUEUE
+
+                    res->event_queue.push_back(std::make_pair<QQEvent, std::string>(ON_BUDDY_STATUS_CHANGE, value));
+#endif
+                     if ( res->event_adapter.is_event_registered(ON_BUDDY_STATUS_CHANGE) )
+                    {
+                        res->event_adapter.trigger(ON_BUDDY_STATUS_CHANGE ,value);
+                    }
+                    else
+                    {
+                        debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+                    }
                 }
             }
+            res->ulock();
         }
     }
 }
