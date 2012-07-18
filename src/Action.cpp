@@ -41,7 +41,7 @@ void Adapter::trigger( const QQEvent &event, const std::string data)
     caller.call(data);
 }
 
-void Adapter::register_event_handler(QQEvent event, EventListener el)
+void Adapter::register_event_handler(const QQEvent &event, EventListener el)
 {
     if ( event_map.count(event) != 0 )
     {
@@ -73,4 +73,15 @@ void Adapter::delete_event_handler(QQEvent event)
     //delete it->second;
     event_map.erase(it);
     debug_info("Delete event handler success. (%s,%d)", __FILE__, __LINE__);
+}
+
+const EventListener Adapter::get_event_handler(const QQEvent & event)
+{
+    if ( event_map.count( event) == 0 )
+    {
+        debug_error("Unregistered  Event");
+        return NULL;
+    }
+    Action action = event_map[event];
+    return action.getCallback();
 }

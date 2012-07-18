@@ -37,6 +37,10 @@ public:
         _callback = cb;
     }
 
+    const EventListener getCallback(){
+        return _callback;
+    }
+
     virtual ~Action(){ std::cout<<"Destruct Action"<<std::endl; n_actions --; }
     static int n_actions;
 };
@@ -64,7 +68,8 @@ public:
     Adapter();
     ~Adapter();
     void trigger( const QQEvent &event, const std::string data);
-    void register_event_handler(QQEvent event, EventListener callback);
+    void register_event_handler(const QQEvent  & event, EventListener callback);
+    const EventListener get_event_handler(const QQEvent & event);
     bool is_event_registered(const QQEvent & event);
     void delete_event_handler(QQEvent event);
 };

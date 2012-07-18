@@ -2,6 +2,7 @@
 %{
 #define SWIG_FILE_WITH_INIT
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 #include <sstream>
 #include <stdio.h>
 #include <Action.h>
@@ -10,6 +11,30 @@
 #include <QQPlugin.h>
 #include <json/json.h>
 #include <SmartPtr.h>
+class PyCallback
+{
+    PyObject *func;
+    PyCallback& operator=(const PyCallback&); // Not allowed
+    public:
+    PyCallback(const PyCallback& o) : func(o.func) {
+         Py_XINCREF(func);
+    }
+    PyCallback(PyObject *func) : func(func) {
+         Py_XINCREF(this->func);
+         assert(PyCallable_Check(this->func));
+    }
+    ~PyCallback() {
+         Py_XDECREF(func);
+    }
+    void operator()(const std::string& s) {
+         if (!func || Py_None == func || !PyCallable_Check(func))
+              return;
+         PyObject *args = Py_BuildValue("(s)", s.c_str());
+         PyObject *result = PyObject_Call(func,args,0);
+         Py_DECREF(args);
+         Py_XDECREF(result);
+    }
+};
 %}
 
 %include "Action.h"
@@ -28,6 +53,16 @@
 %pythonprepend Action::setAction %{
         args[1].thisown=0
 %}
+%extend Action {
+  void setCallback(PyObject *callback) {
+      $self->setCallback(PyCallback(callback));
+      }
+}
+%extend Adapter {
+void register_event_handler(const QQEvent& e, PyObject *callback) {
+     $self->register_event_handler(e, PyCallback(callback));
+     }
+}
 
 %template(SingletonQQConfig) Singleton<QQConfig>;
 %template(SingletonQQPlugin) Singleton<QQPlugin>;
