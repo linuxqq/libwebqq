@@ -18,7 +18,8 @@
 typedef boost::function<void (std::string)> EventListener;
 
 enum  QQEvent{
-    ON_RECEIVE_MESSAGE = 512,
+    ON_BUDDY_MESSAGE = 512,
+    ON_GROUP_MESSAGE,
     ON_SEND_MESSAGE,
     ON_RECEIVE_AVATAR,
     ON_BUDDY_STATUS_CHANGE,

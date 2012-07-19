@@ -69,6 +69,7 @@ void register_event_handler(const QQEvent& e, PyObject *callback) {
 %template(SingletonQQPlugin) Singleton<QQPlugin>;
 %template(SingletonResourceManager) Singleton<ResourceManager>;
 namespace std{
+    %template(map_int_qqcategory) map<int,QQCategory>;
     %template(map_string_qqgroup) map<std::string , QQGroup>; 
     %template(map_string_qqbuddy) map<std::string , QQBuddy>;
     %template(pair_event_string) pair<int, std::string>;

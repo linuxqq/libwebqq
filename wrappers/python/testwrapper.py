@@ -28,7 +28,7 @@ class Worker:
         #a.setCallback(self.on_message)
         #self.register_handler(ON_RECEIVE_MESSAGE, self.on_message)
         self.res.ulock()
-        if not self.res.event_adapter.is_event_registered(ON_RECEIVE_MESSAGE) :
+        if not self.res.event_adapter.is_event_registered(ON_BUDDY_MESSAGE) :
             print "Fail to register event"
 
     def login(self):

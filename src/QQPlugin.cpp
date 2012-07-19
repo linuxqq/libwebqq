@@ -230,6 +230,8 @@ void QQPlugin::parse_user_friends(const Json::Value & root)
         Json::Value cates = value["categories"];
         Json::Value friends = value["friends"];
         Json::Value vipinfo = value["vipinfo"];
+        Json::FastWriter writer ;
+
         for( Json::Value::iterator it = cates.begin(); it != cates.end(); it ++)
         {
             QQCategory cate;
@@ -238,7 +240,6 @@ void QQPlugin::parse_user_friends(const Json::Value & root)
             res->categories[ cate.index] = cate;
         }
 
-        Json::FastWriter writer ;
 
         for( Json::Value::iterator it = friends.begin(); it != friends.end(); it ++ )
         {
@@ -362,7 +363,7 @@ void QQPlugin::GetLongNick::run(void *ptr)
         int retcode = root["retcode"].asInt();
         if ( 0 == retcode)
         {
-            res->contacts[uin].lnick= writer.write( root["result"][0]["lnick"]);
+            res->contacts[uin].lnick= QQUtil::trim(writer.write( root["result"][0]["lnick"]));
         }
         else
         {
@@ -748,11 +749,11 @@ void QQPlugin::Poll2::run( void * ptr)
                 if ( poll_type == "message")
                 {
 #ifdef USE_EVENT_QUEUE
-                    res->event_queue.push_back(std::make_pair<QQEvent, std::string>(ON_RECEIVE_MESSAGE, value));
+                    res->event_queue.push_back(std::make_pair<QQEvent, std::string>(ON_BUDDY_MESSAGE, value));
 #endif
-                    if ( res->event_adapter.is_event_registered(ON_RECEIVE_MESSAGE) )
+                    if ( res->event_adapter.is_event_registered(ON_BUDDY_MESSAGE) )
                     {
-                        res->event_adapter.trigger(ON_RECEIVE_MESSAGE ,value);
+                        res->event_adapter.trigger(ON_BUDDY_MESSAGE ,value);
                     }
                     else
                     {
@@ -769,6 +770,20 @@ void QQPlugin::Poll2::run( void * ptr)
                      if ( res->event_adapter.is_event_registered(ON_BUDDY_STATUS_CHANGE) )
                     {
                         res->event_adapter.trigger(ON_BUDDY_STATUS_CHANGE ,value);
+                    }
+                    else
+                    {
+                        debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+                    }
+                }
+                else if ( poll_type == "group_message")
+                {
+#ifdef USE_EVENT_QUEUE
+                    res->event_queue.push_back(std::make_pair<QQEvent, std::string>( ON_GROUP_MESSAGE , value));
+#endif
+                    if ( res->event_adapter.is_event_registered (ON_GROUP_MESSAGE))
+                    {
+                        res->event_adapter.trigger(ON_GROUP_MESSAGE ,value);
                     }
                     else
                     {
