@@ -28,11 +28,6 @@ int QQPlugin::message_id = 70480000;
 ResourceManager::ResourceManager()
 {
 
-#ifdef USE_EVENT_QUEUE
-    debug_info("Use event queue");
-#else
-    debug_info("Not use event queue");
-#endif
 }
 
 ResourceManager::~ResourceManager()
@@ -274,7 +269,7 @@ void QQPlugin::parse_user_friends(const Json::Value & root)
 void QQPlugin::get_group_name_list()
 {
 
-    debug_info("Get Group name list");
+    debug_info("Get Group name list (%s,%d)", __FILE__, __LINE__);
 
     std::string uri="http://s.web2.qq.com/api/get_group_name_list_mask2";
 
@@ -405,7 +400,6 @@ void QQPlugin::GetFriendUin::run( void * ptr)
 
     std::string result = request->requestServer(uri);
     res->lock();
-    debug_info("GetFriendUin: %s", result.c_str());
     try{
 
         Json::FastWriter writer;
@@ -454,7 +448,6 @@ void QQPlugin::GetFriendsInfo2::run( void * ptr)
     request->setHttpHeaders(headers);
 
     std::string result = request->requestServer(uri);
-    debug_info("GetFriendsInfo: %s", result.c_str());
     try
     {
         res->lock();
@@ -686,7 +679,7 @@ void QQPlugin::GetGroupInfo::run( void *ptr)
 
 void QQPlugin::get_group_info()
 {
-    debug_info("Get Group Info");
+    debug_info("Get Group Info ... (%s,%d)", __FILE__, __LINE__);
     get_group_name_list();
     if ( res->groups.empty())
     {
@@ -736,7 +729,6 @@ void QQPlugin::Poll2::run( void * ptr)
         else if (ret == 0 )
         {
             ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
-            debug_info("Result Size : %d", root["result"].size());
             res->lock();
 
             for ( Json::Value::iterator iter = root["result"].begin() ; iter != root["result"].end() ; iter ++ )
@@ -824,7 +816,7 @@ void QQPlugin::SendBuddyMessage::run(void * ptr)
         if ( ret == 0)
         {
             *success = true;
-            debug_info("Success to send buddy message!");
+            debug_info("Success to send buddy message!... (%s,%d)", __FILE__, __LINE__);
         }
         else
         {
@@ -865,7 +857,7 @@ void QQPlugin::SendGroupMessage::run( void *ptr)
         if ( ret == 0)
         {
             *success = true;
-            debug_info("Success to send buddy message!");
+            debug_info("Success to send group message!... (%s,%d)", __FILE__, __LINE__);
         }
         else
         {
