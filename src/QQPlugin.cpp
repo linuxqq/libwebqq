@@ -64,6 +64,10 @@ QQPlugin::~QQPlugin()
 bool QQPlugin::webqq_login(const std::string & user, const std::string & password, const std::string & status)
 {
 
+    QQBuddy me;
+    me.uin = user;
+    res->contacts[me.uin] = me;
+
     std::string uri("http://check.ptlogin2.qq.com/check?uin="+\
                     user+"&appid=1003903&r=0.09714792561565866");
 
