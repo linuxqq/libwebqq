@@ -66,6 +66,7 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
 
     QQBuddy me;
     me.uin = user;
+    me.status = status;
     me.cate_index = 0;
     res->contacts[me.uin] = me;
 
@@ -147,7 +148,6 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
                               +"%22%2C%22key%22%3A0%2C%22ids%22%3A%5B%5D%7D&clientid="+\
                               clientid+"&psessionid="+ psessionid;
 
-            std::cout<<body<<std::endl;
 
             Poll2 * poll = new Poll2(body );
             ThreadPool::run(poll, res, true);
@@ -363,7 +363,9 @@ void QQPlugin::GetLongNick::run(void *ptr)
         int retcode = root["retcode"].asInt();
         if ( 0 == retcode)
         {
-            res->contacts[uin].lnick= QQUtil::trim(writer.write( root["result"][0]["lnick"]));
+            std::string lnick = QQUtil::trim(writer.write( root["result"][0]["lnick"]));
+            QQUtil::replaceAll(lnick,"\"","");
+            res->contacts[uin].lnick = lnick;
         }
         else
         {
@@ -480,7 +482,9 @@ void QQPlugin::GetFriendsInfo2::run( void * ptr)
             res->contacts[uin].city= writer.write( root["result"]["city"]);
             res->contacts[uin].province = writer.write( root["result"]["province"]);
             res->contacts[uin].personal= writer.write( root["result"]["personal"]);
-            res->contacts[uin].nick= QQUtil::trim(writer.write( root["result"]["nick"]));
+            std::string nick = QQUtil::trim(writer.write( root["result"]["nick"]));
+            QQUtil::replaceAll(nick,"\"","");
+            res->contacts[uin].nick= nick;
             res->contacts[uin].gender= writer.write( root["result"]["gender"]);
             res->contacts[uin].email= writer.write( root["result"]["email"]);
             res->contacts[uin].shengxiao = root["result"]["shengxiao"].asInt();
@@ -513,8 +517,6 @@ void QQPlugin::get_online_buddies()
     request->setHttpHeaders(headers);
 
     std::string result = request->requestServer(uri);
-
-    std::cout<<result<<std::endl;
 
     try{
         Json::FastWriter writer;
@@ -716,7 +718,6 @@ void QQPlugin::Poll2::run( void * ptr)
         client->setHttpHeaders(headers);
 
         std::string result = client->requestServer("http://d.web2.qq.com/channel/poll2",body);
-        std::cout<<result<<std::endl;
         delete client;
         Json::Reader jsonReader;
         Json::Value root;
@@ -809,8 +810,6 @@ void QQPlugin::SendBuddyMessage::run(void * ptr)
 
     client->setHttpHeaders(headers);
 
-    std::cout<<body<<std::endl;
-
     std::string result = client->requestServer("http://d.web2.qq.com/channel/send_buddy_msg2",body);
     delete client;
     try{
@@ -849,8 +848,6 @@ void QQPlugin::SendGroupMessage::run( void *ptr)
     headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=1&id=2");
 
     client->setHttpHeaders(headers);
-
-    std::cout<<body<<std::endl;
 
     std::string result = client->requestServer("http://d.web2.qq.com/channel/send_qun_msg2",body);
     delete client;

@@ -138,7 +138,6 @@ void HttpClient::perform()
                 it != cookies.end();  ++it)
             {
                 curl_easy_setopt(request, CURLOPT_COOKIELIST, (*it).c_str());
-                //std::cout<<"Cookie to set: "<<(*it)<<std::endl;
             }
         }
         else
@@ -163,7 +162,6 @@ void HttpClient::perform()
                 foreach_slist=foreach_slist->next)
             {
                 std::string cookie_str(foreach_slist->data);
-                //std::cout<<"Cookie: "<<cookie_str<<std::endl;
                 cookies.push_back(cookie_str);
             }
             curl_slist_free_all(cookie_slist);
@@ -189,14 +187,11 @@ std::string HttpClient::requestServer(const std::string & uri, const std::string
 
         if(request!=NULL)
         {
-            debug_info("Uri: %s", uri.c_str());
             curl_easy_setopt(request, CURLOPT_URL, uri.c_str());
-            //request->setOpt( new curlpp::options::Url(uri));
         }
 
         if ( body != std::string(""))
         {
-            //std::cout<<body<<std::endl;
             curl_easy_setopt(request, CURLOPT_POSTFIELDS, body.c_str());
             curl_easy_setopt(request, CURLOPT_POSTFIELDSIZE, body.size());
         }
@@ -207,7 +202,6 @@ std::string HttpClient::requestServer(const std::string & uri, const std::string
 
         perform();
         result = mWriterChunk.getContent();
-        //debug_info("Result:%s", result.c_str());
         return result;
     }
     while(0);
