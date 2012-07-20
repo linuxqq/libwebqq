@@ -111,10 +111,10 @@ namespace QQUtil{
 
 
 
-    int StrToInt(const std::string &str)
+    int64_t StrToInt(const std::string &str)
     {
         std::istringstream strm(str);
-        int i = 0;
+        int64_t i = 0;
         if(!(strm >> i))
         {
             std::cerr<<"Unable to convert string '" + str + "' to integer!"<<

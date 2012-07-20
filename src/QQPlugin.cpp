@@ -480,7 +480,7 @@ void QQPlugin::GetFriendsInfo2::run( void * ptr)
             res->contacts[uin].city= writer.write( root["result"]["city"]);
             res->contacts[uin].province = writer.write( root["result"]["province"]);
             res->contacts[uin].personal= writer.write( root["result"]["personal"]);
-            res->contacts[uin].nick= writer.write( root["result"]["nick"]);
+            res->contacts[uin].nick= QQUtil::trim(writer.write( root["result"]["nick"]));
             res->contacts[uin].gender= writer.write( root["result"]["gender"]);
             res->contacts[uin].email= writer.write( root["result"]["email"]);
             res->contacts[uin].shengxiao = root["result"]["shengxiao"].asInt();

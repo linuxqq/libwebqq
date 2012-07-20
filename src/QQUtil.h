@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 namespace QQUtil{
 
@@ -23,7 +24,7 @@ namespace QQUtil{
 
     std::string urldecode(const std::string& s);
 
-    int StrToInt(const std::string &str);
+    int64_t  StrToInt(const std::string &str);
 
     std::string IntToStr(int );
 
