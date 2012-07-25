@@ -486,7 +486,7 @@ bool QQPlugin::send_buddy_message(const std::string & uin, const std::string & m
             font["style"][i] = 0;
         font["color"] ="000000";
 
-        root["to"] = QQUtil::StrToInt(uin);
+        root["to"] = static_cast<Json::Value::UInt64> (QQUtil::StrToInt(uin));
         root["face"]=0;
         content[0] = message_body;
         content[1][0]="font";
@@ -497,7 +497,7 @@ bool QQPlugin::send_buddy_message(const std::string & uin, const std::string & m
         str.erase(str.begin()+ pos+1, str.end());
 
         root["msg_id"] = message_id ++ ;
-        root["clientid"] = QQUtil::StrToInt(clientid);
+        root["clientid"] = static_cast<Json::Value::UInt64>(QQUtil::StrToInt(clientid));
         root["psessionid"] = psessionid;
 
         root["content"] = str;
