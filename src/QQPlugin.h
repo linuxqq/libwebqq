@@ -20,9 +20,11 @@
 #include<pthread.h>
 
 #include "QQTypes.h"
-#include "Action.h"
+#include "QQAction.h"
 #include "json/json.h"
 #include "ThreadPool.h"
+#include "QQEventQueue.h"
+
 struct ResourceManager:Singleton<ResourceManager>
 {
 
@@ -36,9 +38,9 @@ public:
     std::map<std::string, QQGroup> groups;
     std::map<std::string, QQBuddy>  contacts;
     std::map<std::string, std::map<std::string, QQBuddy> > group_contacts;
-//#ifdef USE_EVENT_QUEUE
-    std::list<std::pair<int,std::string> > event_queue;
-//#endif
+
+    QQEventQueue event_queue;
+
     Adapter event_adapter;
 
     virtual ~ResourceManager();
@@ -46,7 +48,6 @@ public:
     void lock();
     void ulock();
 };
-
 
 class QQPlugin: public Singleton<QQPlugin>
 {
@@ -63,58 +64,6 @@ public:
 
     virtual  ~QQPlugin();
 
-    class GetLongNick:public ThreadPool::TPool::TJob{
-    public:
-        GetLongNick(const std::string & uin, const std::string & vfwebqq);
-
-        virtual void run(void *);
-
-    private:
-        std::string uin;
-        std::string vfwebqq;
-    };
-
-    class GetFriendUin:public ThreadPool::TPool::TJob{
-    public:
-        GetFriendUin( const std::string & uin , const std::string & vfwebqq);
-
-        virtual void run(void *);
-
-    private:
-        std::string uin;
-        std::string vfwebqq;
-    };
-
-
-    class GetFriendsInfo2: public ThreadPool::TPool::TJob
-    {
-        std::string uin;
-        std::string vfwebqq;
-
-    public:
-        GetFriendsInfo2( const std::string & uin  , const std::string & vfwebqq );
-        virtual void run( void *);
-    };
-
-
-    class GetGroupInfo: public ThreadPool::TPool::TJob
-    {
-        std::string gcode;
-        std::string vfwebqq;
-    public:
-        GetGroupInfo(const std::string & gcode, const std::string & vfwebqq);
-        virtual void run( void *);
-    };
-
-    class Poll2:public ThreadPool::TPool::TJob
-    {
-        std::string body;
-
-    public:
-
-        Poll2(const std::string & data);
-        virtual void run(void *);
-    };
 
     class SendBuddyMessage:public ThreadPool::TPool::TJob{
         std::string body;

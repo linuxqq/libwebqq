@@ -1,5 +1,5 @@
 /**
- * @file   Action.cpp
+ * @file   QQAction.cpp
  * @author Xiang Wang <xiang_wang@trendmicro.com.cn>
  * @date   Sun Jun  3 10:54:22 2012
  *
@@ -8,7 +8,7 @@
  *
  */
 
-#include "Action.h"
+#include "QQAction.h"
 
 #include <iostream>
 #include "QQDebug.h"
@@ -46,6 +46,7 @@ void Adapter::register_event_handler(const QQEvent &event, EventListener el)
     if ( event_map.count(event) != 0 )
     {
         debug_info("An event handler has been loaded, reload new handler. (%s,%d)", __FILE__, __LINE__);
+        //delete event_map[event];
         event_map[event] = Action(el);
         return ;
     }
@@ -69,6 +70,7 @@ void Adapter::delete_event_handler(QQEvent event)
 
     std::map<QQEvent, Action>::iterator it;
     it = event_map.find(event);
+    //delete it->second;
     event_map.erase(it);
     debug_info("Delete event handler success. (%s,%d)", __FILE__, __LINE__);
 }

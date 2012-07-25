@@ -5,11 +5,12 @@
 #include <boost/function.hpp>
 #include <sstream>
 #include <stdio.h>
-#include <Action.h>
+#include <QQAction.h>
 #include <QQTypes.h>
 #include <Singleton.h>
 #include <QQPlugin.h>
 #include <json/json.h>
+#include <QQEventQueue.h>
 #include <SmartPtr.h>
 class PyCallback
 {
@@ -37,7 +38,7 @@ class PyCallback
 };
 %}
 
-%include "Action.h"
+%include "QQAction.h"
 %include "callback.i"
 %include stl.i
 %include "std_list.i"
@@ -47,6 +48,7 @@ class PyCallback
 %include "Singleton.h"
 %include "QQTypes.h"
 %include "QQPlugin.h"
+%include "QQEventQueue.h"
 %include "json/json.h"
 %include "SmartPtr.h"
 

@@ -1,0 +1,70 @@
+/**
+ * @file   QQTask.h
+ * @author Xiang Wang <xiang_wang@trendmicro.com.cn>
+ * @date   Wed Jul 25 17:16:11 2012
+ *
+ * @brief
+ *
+ *
+ */
+
+#ifndef __QQ_TASK_H__
+#define __QQ_TASK_H__
+#include <string>
+#include "ThreadPool.h"
+
+class QQTask{
+
+public:
+
+    QQTask(const std::string &uin, const std::string & vfwebqq );
+
+    ~QQTask();
+
+    std::string uin;
+    std::string vfwebqq;
+
+};
+
+class GetLongNick:public ThreadPool::TPool::TJob, public QQTask{
+public:
+    GetLongNick(const std::string & uin, const std::string & vfwebqq);
+
+    virtual void run(void *);
+};
+
+class GetFriendUin:public ThreadPool::TPool::TJob, public QQTask{
+public:
+    GetFriendUin( const std::string & uin , const std::string & vfwebqq);
+    virtual void run(void *);
+
+};
+
+
+class GetFriendsInfo2: public ThreadPool::TPool::TJob , QQTask
+{
+
+public:
+    GetFriendsInfo2( const std::string & uin  , const std::string & vfwebqq );
+    virtual void run( void *);
+};
+
+
+class GetGroupInfo: public ThreadPool::TPool::TJob, public QQTask
+{
+    std::string gcode;
+public:
+    GetGroupInfo(const std::string & gcode, const std::string & vfwebqq);
+    virtual void run( void *);
+};
+
+class Poll2:public ThreadPool::TPool::TJob
+{
+    std::string body;
+
+public:
+
+    Poll2(const std::string & data);
+    virtual void run(void *);
+};
+#endif

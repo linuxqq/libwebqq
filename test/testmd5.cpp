@@ -8,7 +8,7 @@
  *
  */
 
-#include "md5.h"
+#include "QQMD5.h"
 #include <stdio.h>
 #define debug_info printf
 #include <string>

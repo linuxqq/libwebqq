@@ -57,7 +57,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "md5.h"
+#include "QQMD5.h"
 #ifdef WITH_DMALLOC
 #  include <dmalloc.h>
 #endif

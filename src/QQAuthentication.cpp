@@ -11,7 +11,7 @@
 #include "QQAuthentication.h"
 #include <iostream>
 #include <string>
-#include "md5.h"
+#include "QQMD5.h"
 #include "QQDebug.h"
 #include <cctype>
 #include <algorithm>

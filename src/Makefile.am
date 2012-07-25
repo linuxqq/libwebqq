@@ -6,11 +6,14 @@ libwebqq_la_SOURCES= Thread.h Thread.cpp \
 		     Singleton.h \
 		     HttpClient.h HttpClient.cpp\
 		     QQDebug.h QQDebug.cpp\
-		     md5.h md5.cpp \
-		     Action.h Action.cpp\
+		     QQMD5.h QQMD5.cpp \
+		     QQAction.h QQAction.cpp\
+		     QQEventQueue.h QQEventQueue.cpp\
 		     QQAuthentication.h QQAuthentication.cpp\
 		     QQUtil.h QQUtil.cpp\
 		     QQPlugin.h QQPlugin.cpp\
+		     QQTask.h QQTask.cpp \
+		     QQTaskManager.h QQTaskManager.cpp\
    		     QQTypes.h
 
 AM_CFLAGS = -g  -Wall -Werror -D_REENTRANT  -Wall -Wno-long-long -Wshadow -Wpacked -Wundef -Wchar-subscripts  -pedantic -ansi
