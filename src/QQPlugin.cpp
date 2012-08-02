@@ -54,9 +54,9 @@ QQPlugin::QQPlugin()
 
 QQPlugin::~QQPlugin()
 {
-    delete res;
     ThreadPool::sync_all();
     ThreadPool::done();
+    delete res;
 }
 
 bool QQPlugin::webqq_login(const std::string & user, const std::string & password, const std::string & status)
@@ -140,6 +140,18 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
             get_group_info();
             ThreadPool::sync_all();
             debug_info("Login Sucess ... (%s,%d)", __FILE__, __LINE__);
+            int count =0;
+            for ( std::map<std::string , QQBuddy>::iterator it = res->contacts.begin();
+                  it != res->contacts.end(); it ++, count ++ )
+            {
+                GetFriendsInfo2 * getinfo = new GetFriendsInfo2( it->first, vfwebqq);
+                ThreadPool::run(getinfo, res, true);
+                if ( count == 100)
+                {
+                    count = 0;
+                    sleep(5);
+                }
+            }
 
             std::string body ="r=%7B%22clientid%22%3A%22"+clientid+    \
                               "%22%2C%22psessionid%22%3A%22"+psessionid\
@@ -197,9 +209,6 @@ void QQPlugin::get_user_friends()
             {
                 GetLongNick*  getnick = new GetLongNick( it->first, vfwebqq);
                 ThreadPool::run(getnick,res, true);
-
-                GetFriendsInfo2 * getinfo = new GetFriendsInfo2( it->first, vfwebqq);
-                ThreadPool::run(getinfo, res, true);
 
                 GetFriendUin * getuin = new GetFriendUin( it->first, vfwebqq);
                 ThreadPool::run(getuin, res, true);
