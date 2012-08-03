@@ -291,7 +291,7 @@ void GetGroupInfo::run( void *ptr)
                 res->groups[gcode].fingermemo = ginfo["fingermemo"].asString();
                 res->groups[gcode].flag = writer.write(ginfo["flag"]);
                 res->groups[gcode].gclass = QQUtil::trim(writer.write(ginfo["class"]));
-                res->groups[gcode].name = writer.write(ginfo["name"]);
+                res->groups[gcode].name = ginfo["name"].asString();
                 res->groups[gcode].owner = writer.write(ginfo["owner"]);
                 res->groups[gcode].option = ginfo["option"].asInt();
 

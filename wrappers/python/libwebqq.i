@@ -77,6 +77,7 @@ namespace std{
     %template(pair_int_string) pair<int, std::string>;
     %template(list_pair_event_string) list<std::pair<int, std::string>  >;
     %template(pair_event_string) pair<QQEvent, std::string>;
+    %template(map_string_map_string_buddy) map<std::string, std::map<std::string , QQBuddy> >;
 }
 %template() std::pair<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject>;
 %template(pymap) std::map<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject>;
