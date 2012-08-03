@@ -150,8 +150,6 @@ void GetFriendsInfo2::run( void * ptr)
     request->setHttpHeaders(headers);
 
     std::string result = request->requestServer(uri);
-    std::cout<<uin<<std::endl;
-    std::cout<<result<<std::endl;
     try
     {
         res->lock();
@@ -191,7 +189,6 @@ void GetFriendsInfo2::run( void * ptr)
             Json::Value json_result ;
             json_result["uin"] = uin;
             json_result["nick"] = nick;
-            std::cout<<json_result<<std::endl;
             res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_NICK_CHANGE, writer.write(json_result)));
 #endif
 
@@ -253,92 +250,119 @@ void GetGroupInfo::run( void *ptr)
         debug_error("Cant not parse json body ... (%s,%d)", \
                     __FILE__, __LINE__);
     }
-
-    uri = "http://s.web2.qq.com/api/get_group_info_ext2?gcode="+\
-          gcode+ "&vfwebqq="+ vfwebqq+"&t=1339476485660";
-
-    request = new HttpClient();
-    headers.clear();
-    headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
-    request->setHttpHeaders(headers);
-
-    result = request->requestServer(uri);
-    delete request;
-    try{
-        Json::FastWriter writer;
-        Json::Reader jsonReader;
-        Json::Value root;
-        jsonReader.parse(result, root, false);
-        int retcode = root["retcode"].asInt();
-
-        if ( 0 == retcode)
-        {
-            res->lock();
-            Json::Value ginfo = root["result"]["ginfo"];
-            gcode = QQUtil::trim( writer.write(ginfo["code"]));
-            if ( res->groups.count(gcode) == 0)
-            {
-                debug_error( "invalid group code. ...(%s,%d)", __FILE__, __LINE__);
-            }
-            res->groups[gcode].gid = QQUtil::trim(writer.write(ginfo["gid"]));
-            res->groups[gcode].level = ginfo["level"].asInt();
-            res->groups[gcode].fingermemo = ginfo["fingermemo"].asString();
-            res->groups[gcode].flag = writer.write(ginfo["flag"]);
-            res->groups[gcode].gclass = QQUtil::trim(writer.write(ginfo["class"]));
-            res->groups[gcode].name = writer.write(ginfo["name"]);
-            res->groups[gcode].owner = writer.write(ginfo["owner"]);
-            res->groups[gcode].option = ginfo["option"].asInt();
-
-            Json::Value minfo = root["result"]["minfo"];
-            for ( Json::Value::iterator it = minfo.begin(); it != minfo.end() ; it ++)
-            {
-                std::string uin = QQUtil::trim( writer.write((*it)["uin"]));
-                QQBuddy buddy;
-                buddy.uin = uin;
-                buddy.city = (*it)["city"].asString();
-                buddy.country = (*it)["country"].asString();
-                buddy.nick = (*it)["nick"].asString();
-                buddy.province = (*it)["province"].asString();
-                res->group_contacts[gcode][uin] = buddy;
-            }
-
-            Json::Value status = root["result"]["status"];
-            for ( Json::Value::iterator it = status.begin(); it != status.end() ; it ++)
-            {
-                std::string uin = QQUtil::trim(writer.write((*it)["uin"]));
-                if ( res->group_contacts[gcode].count(uin) == 0)
-                {
-                    debug_error("Invalid group member uin ... (%s,%d)", __FILE__, __LINE__);
-                    continue;
-                }
-                res->group_contacts[gcode][uin].client_type = (*it)["client_type"].asInt();
-                int status = (*it)["stat"].asInt();
-                switch ( status)
-                {
-                case 10:
-                    res->group_contacts[gcode][uin].status = "online";
-                    break ;
-                case 30:
-                    res->group_contacts[gcode][uin].status = "away";
-                    break;
-                case 70 :
-                    res->group_contacts[gcode][uin].status = "offline";
-                    break;
-                }
-            }
-            res->ulock();
-        }
-        else{
-            debug_error("Get Group member list fail");
-        }
-    }catch(...)
+    while(1)
     {
-        res->ulock();
-        debug_error("Cant not parse json body ... (%s,%d)", \
-                    __FILE__, __LINE__);
+
+        uri = "http://s.web2.qq.com/api/get_group_info_ext2?gcode="+\
+              gcode+ "&vfwebqq="+ vfwebqq+"&t=1339476485660";
+
+        request = new HttpClient();
+        headers.clear();
+        headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
+        request->setHttpHeaders(headers);
+
+        result = request->requestServer(uri);
+        delete request;
+        try{
+            Json::FastWriter writer;
+            Json::Reader jsonReader;
+            Json::Value root;
+            jsonReader.parse(result, root, false);
+            int retcode = root["retcode"].asInt();
+
+            if ( 0 == retcode)
+            {
+                res->lock();
+                Json::Value ginfo = root["result"]["ginfo"];
+                gcode = QQUtil::trim( writer.write(ginfo["code"]));
+                if ( res->groups.count(gcode) == 0)
+                {
+                    debug_error( "invalid group code. ...(%s,%d)", __FILE__, __LINE__);
+                }
+                res->groups[gcode].gid = QQUtil::trim(writer.write(ginfo["gid"]));
+                res->groups[gcode].level = ginfo["level"].asInt();
+                res->groups[gcode].fingermemo = ginfo["fingermemo"].asString();
+                res->groups[gcode].flag = writer.write(ginfo["flag"]);
+                res->groups[gcode].gclass = QQUtil::trim(writer.write(ginfo["class"]));
+                res->groups[gcode].name = writer.write(ginfo["name"]);
+                res->groups[gcode].owner = writer.write(ginfo["owner"]);
+                res->groups[gcode].option = ginfo["option"].asInt();
+
+                Json::Value minfo = root["result"]["minfo"];
+                for ( Json::Value::iterator it = minfo.begin(); it != minfo.end() ; it ++)
+                {
+                    std::string uin = QQUtil::trim( writer.write((*it)["uin"]));
+                    QQBuddy buddy;
+                    buddy.uin = uin;
+                    buddy.city = (*it)["city"].asString();
+                    buddy.country = (*it)["country"].asString();
+                    buddy.nick = (*it)["nick"].asString();
+                    buddy.province = (*it)["province"].asString();
+                    res->group_contacts[gcode][uin] = buddy;
+                }
+
+                Json::Value status = root["result"]["status"];
+                for ( Json::Value::iterator it = status.begin(); it != status.end() ; it ++)
+                {
+                    std::string uin = QQUtil::trim(writer.write((*it)["uin"]));
+                    if ( res->group_contacts[gcode].count(uin) == 0)
+                    {
+                        debug_error("Invalid group member uin ... (%s,%d)", __FILE__, __LINE__);
+                        continue;
+                    }
+                    res->group_contacts[gcode][uin].client_type = (*it)["client_type"].asInt();
+                    int status = (*it)["stat"].asInt();
+                    switch ( status)
+                    {
+                    case 10:
+                        res->group_contacts[gcode][uin].status = "online";
+                        break ;
+                    case 30:
+                        res->group_contacts[gcode][uin].status = "away";
+                        break;
+                    case 70 :
+                        res->group_contacts[gcode][uin].status = "offline";
+                        break;
+                    }
+                }
+                res->ulock();
+                break;
+            }
+            else{
+                debug_error("Get Group member list fail ... (%s,%d)", __FILE__, __LINE__ );
+                sleep(5);
+                debug_info("Retry to get group memeber list ... (%s,%d)", __FILE__, __LINE__);
+            }
+        }catch(...)
+        {
+            res->ulock();
+            debug_error("Cant not parse json body ... (%s,%d)", \
+                        __FILE__, __LINE__);
+        }
     }
 }
 
+GetMiscInfo::GetMiscInfo(const std::string &vfwebqq)
+{
+    this->vfwebqq = vfwebqq;
+}
+
+void GetMiscInfo::run(void * ptr)
+{
+    ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
+    int count =0;
+    for ( std::map<std::string , QQBuddy>::iterator it = res->contacts.begin();
+          it != res->contacts.end(); it ++, count ++ )
+    {
+        GetFriendsInfo2 * getinfo = new GetFriendsInfo2( it->first, vfwebqq);
+        ThreadPool::run(getinfo, res, true);
+        if ( count == 80)
+        {
+            count = 0;
+            sleep(5);
+        }
+    }
+}
 
 Poll2::Poll2(const std::string & data)
 {
@@ -406,7 +430,7 @@ void Poll2::run( void * ptr)
 
                     res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_BUDDY_STATUS_CHANGE, value));
 #endif
-                     if ( res->event_adapter.is_event_registered(ON_BUDDY_STATUS_CHANGE) )
+                    if ( res->event_adapter.is_event_registered(ON_BUDDY_STATUS_CHANGE) )
                     {
                         res->event_adapter.trigger(ON_BUDDY_STATUS_CHANGE ,value);
                     }

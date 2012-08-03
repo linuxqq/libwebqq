@@ -140,18 +140,9 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
             get_group_info();
             ThreadPool::sync_all();
             debug_info("Login Sucess ... (%s,%d)", __FILE__, __LINE__);
-            int count =0;
-            for ( std::map<std::string , QQBuddy>::iterator it = res->contacts.begin();
-                  it != res->contacts.end(); it ++, count ++ )
-            {
-                GetFriendsInfo2 * getinfo = new GetFriendsInfo2( it->first, vfwebqq);
-                ThreadPool::run(getinfo, res, true);
-                if ( count == 100)
-                {
-                    count = 0;
-                    sleep(5);
-                }
-            }
+
+            GetMiscInfo *get_misc_info = new GetMiscInfo(vfwebqq);
+            ThreadPool::run(get_misc_info, res, true);
 
             std::string body ="r=%7B%22clientid%22%3A%22"+clientid+    \
                               "%22%2C%22psessionid%22%3A%22"+psessionid\

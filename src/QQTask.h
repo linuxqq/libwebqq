@@ -58,6 +58,14 @@ public:
     virtual void run( void *);
 };
 
+class GetMiscInfo:public ThreadPool::TPool::TJob
+{
+    std::string vfwebqq;
+public:
+    GetMiscInfo(const std::string & );
+    virtual void run(void *);
+};
+
 class Poll2:public ThreadPool::TPool::TJob
 {
     std::string body;
