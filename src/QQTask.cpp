@@ -191,7 +191,14 @@ void GetFriendsInfo2::run( void * ptr)
             json_result["nick"] = nick;
             res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_NICK_CHANGE, writer.write(json_result)));
 #endif
-
+            if ( res->event_adapter.is_event_registered ( ON_NICK_CHANGE ))
+             {
+                 res->event_adapter.trigger(ON_NICK_CHANGE ,writer.write(json_result));
+             }
+            else
+            {
+                debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+            }
         }
         else
         {
@@ -427,7 +434,6 @@ void Poll2::run( void * ptr)
                 {
 
 #ifdef USE_EVENT_QUEUE
-
                     res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_BUDDY_STATUS_CHANGE, value));
 #endif
                     if ( res->event_adapter.is_event_registered(ON_BUDDY_STATUS_CHANGE) )
