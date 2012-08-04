@@ -197,7 +197,9 @@ void GetFriendsInfo2::run( void * ptr)
              }
             else
             {
+#ifndef USE_EVENT_QUEUE
                 debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+#endif
             }
         }
         else
@@ -426,7 +428,9 @@ void Poll2::run( void * ptr)
                     }
                     else
                     {
+#ifndef USE_EVENT_QUEUE
                         debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+#endif
                     }
                 }
 
@@ -442,7 +446,9 @@ void Poll2::run( void * ptr)
                     }
                     else
                     {
+#ifndef USE_EVENT_QUEUE
                         debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+#endif
                     }
                 }
                 else if ( poll_type == "group_message")
@@ -456,7 +462,9 @@ void Poll2::run( void * ptr)
                     }
                     else
                     {
+#ifndef USE_EVENT_QUEUE
                         debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+#endif
                     }
                 }
             }
