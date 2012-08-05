@@ -18,6 +18,8 @@
 #include "HttpClient.h"
 #include "QQPlugin.h"
 #include <utility>
+#include <sstream>
+
 QQTask::QQTask(const std::string & uin, const std::string &vfwebqq)
 {
     this->uin = uin;
@@ -204,7 +206,7 @@ void GetFriendsInfo2::run( void * ptr)
         }
         else
         {
-            debug_info("Get friends info2 failed with error code %d ... (%s,%d)", retcode, __FILE__, __LINE__);
+            debug_error("Get friends info2 failed with error code %d ... (%s,%d)", retcode, __FILE__, __LINE__);
         }
         res->ulock();
 
@@ -351,6 +353,57 @@ void GetGroupInfo::run( void *ptr)
     }
 }
 
+int GetFace::host_number = 1 ;
+
+GetFace::GetFace(const std::string & uin, const std::string & vfwebqq, int type_ = 1):QQTask(uin, vfwebqq)
+{
+    type = type_;
+}
+
+void GetFace::run(void * ptr)
+{
+     ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
+     std::stringstream uri ;
+     //std::string qqnumber = res->contacts[uin].qqnumber;
+     uri<< "http://"<< "face"<<host_number<<".qun.qq.com"
+        << "/cgi/svr/face/getface?cache=0&type="<<type<<"&fid=0&uin="<<uin<<"&vfwebqq="<<vfwebqq
+        <<"&t="<<QQUtil::currentTimeMillis();
+     host_number = host_number % 10 +1;
+     HttpClient *request = new HttpClient();
+     std::list<std::string> headers;
+     headers.clear();
+     headers.push_back("Referer: http://web.qq.com/");
+     request->setHttpHeaders(headers);
+     std::string result = request->requestServer(uri.str());
+     delete request;
+
+     res->lock();
+     if ( res->contacts.count(uin) != 0 || res->groups.count(uin) !=0 )
+     {
+         res->contacts[uin].face = result;
+#ifdef USE_EVENT_QUEUE
+         res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_AVATAR_UPDATE, uin));
+
+#endif
+         if ( res->event_adapter.is_event_registered (ON_AVATAR_UPDATE))
+         {
+             res->event_adapter.trigger( ON_AVATAR_UPDATE,uin);
+         }
+         else
+         {
+#ifndef USE_EVENT_QUEUE
+             debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+#endif
+         }
+     }
+     else
+     {
+         debug_error("Invaid contact uin ... (%s,%d)", __FILE__, __LINE__);
+     }
+     res->ulock();
+
+}
+
 GetMiscInfo::GetMiscInfo(const std::string &vfwebqq)
 {
     this->vfwebqq = vfwebqq;
@@ -359,12 +412,22 @@ GetMiscInfo::GetMiscInfo(const std::string &vfwebqq)
 void GetMiscInfo::run(void * ptr)
 {
     ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
+    /*
+    for ( std::map<std::string, QQGroup>::iterator it = res->groups.begin();
+          it != res->groups.end(); it++)
+    {
+        GetFace *get_group_face = new GetFace(it->first, vfwebqq, 4);
+        ThreadPool::run(get_group_face, res, true);
+    }
+    */
     int count =0;
     for ( std::map<std::string , QQBuddy>::iterator it = res->contacts.begin();
           it != res->contacts.end(); it ++, count ++ )
     {
-        GetFriendsInfo2 * getinfo = new GetFriendsInfo2( it->first, vfwebqq);
-        ThreadPool::run(getinfo, res, true);
+        GetFriendsInfo2 * get_info = new GetFriendsInfo2( it->first, vfwebqq);
+        GetFace * get_face = new GetFace (it->first, vfwebqq);
+        ThreadPool::run(get_info, res, true);
+        ThreadPool::run(get_face, res, true);
         if ( count == 80)
         {
             count = 0;

@@ -33,6 +33,8 @@ namespace QQUtil{
 
     std::string trim(std::string str);
 
+    int64_t currentTimeMillis();
+
 };
 
 #endif

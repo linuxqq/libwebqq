@@ -69,9 +69,9 @@ public:
 
     std::string getContent()
     {
-        return std::string(m_pBuffer);
+        return std::string(m_pBuffer, m_Size);
     }
-    
+
     static size_t WriteMemoryCCallback(char *ptr, size_t size, size_t nmemb,
         void *instance)
     {

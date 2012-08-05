@@ -58,11 +58,20 @@ public:
     virtual void run( void *);
 };
 
+class GetFace:public ThreadPool::TPool::TJob, public QQTask
+{
+    static int host_number;
+    int type;
+public:
+    GetFace(const std::string & uin, const std::string & vfwebqq, int type);
+    virtual void run(void*);
+};
+
 class GetMiscInfo:public ThreadPool::TPool::TJob
 {
     std::string vfwebqq;
 public:
-    GetMiscInfo(const std::string & );
+    GetMiscInfo(const std::string &);
     virtual void run(void *);
 };
 

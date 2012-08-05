@@ -14,7 +14,8 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
-
+#include <ctime>
+#include <sys/time.h>
 namespace QQUtil{
 
     void urlInPlaceDecode(std::string& s);
@@ -150,5 +151,16 @@ namespace QQUtil{
         std::string::size_type p = str.find_last_of('\n');
         if(p != std::string::npos) str.erase(p);
         return str;
+    }
+
+    int64_t currentTimeMillis()
+    {
+	struct timeval tv;
+	gettimeofday(&tv,NULL);
+	int64_t t =  tv.tv_sec;
+	t *= 1000;
+	t += tv.tv_usec/1000;
+
+	return t;
     }
 };
