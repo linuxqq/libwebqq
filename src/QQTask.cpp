@@ -364,19 +364,23 @@ void GetFace::run(void * ptr)
 {
      ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
      std::stringstream uri ;
-     //std::string qqnumber = res->contacts[uin].qqnumber;
+
+     std::list<std::string> cookies = (Singleton<HttpClient>::getInstance())->dumpCookies();
+
      uri<< "http://"<< "face"<<host_number<<".qun.qq.com"
-        << "/cgi/svr/face/getface?cache=0&type="<<type<<"&fid=0&uin="<<uin<<"&vfwebqq="<<vfwebqq
-        <<"&t="<<QQUtil::currentTimeMillis();
+        << "/cgi/svr/face/getface?cache=0&type="<<type<<"&fid=0&uin="<<uin<<"&vfwebqq="<<vfwebqq;
+
      host_number = host_number % 10 +1;
-     HttpClient *request = new HttpClient();
+     HttpClient *request = new HttpClient(cookies);
      std::list<std::string> headers;
      headers.clear();
      headers.push_back("Referer: http://web.qq.com/");
-     request->setHttpHeaders(headers);
-     std::string result = request->requestServer(uri.str());
-     delete request;
 
+     request->setHttpHeaders(headers);
+
+     std::string result = request->requestServer(uri.str());
+
+     delete request;
      res->lock();
      if ( res->contacts.count(uin) != 0 || res->groups.count(uin) !=0 )
      {
@@ -433,6 +437,13 @@ void GetMiscInfo::run(void * ptr)
             count = 0;
             sleep(5);
         }
+    }
+
+    for ( std::map<std::string, QQGroup>::iterator it = res->groups.begin();
+          it != res->groups.end(); it++)
+    {
+        GetFace *get_group_face = new GetFace(it->first, vfwebqq, 4);
+        ThreadPool::run(get_group_face, res, true);
     }
 }
 
