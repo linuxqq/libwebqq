@@ -24,7 +24,7 @@ class QQEventQueue{
 
     ThreadPool::TMutex mutex;
 
-    const int KMaxSize;;
+    const int KMaxSize;
 
 public:
 

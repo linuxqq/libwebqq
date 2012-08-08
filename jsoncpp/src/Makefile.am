@@ -5,6 +5,5 @@ libjsoncpp_a_SOURCES=json_batchallocator.h   json_reader.cpp\
 		      json_valueiterator.inl json_internalarray.inl\
 		      json_tool.h      json_writer.cpp\
 		      json_internalmap.inl    json_value.cpp 
-AM_CFLAGS = -g
-AM_CXXFLAGS = -fPIC
+AM_CXXFLAGS = -fPIC -g -O2
 AM_LDFLAGS =

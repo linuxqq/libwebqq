@@ -506,7 +506,6 @@ bool QQPlugin::send_buddy_message(const std::string & uin, const std::string & m
         pos = body.find_last_of("}");
         body.erase(body.begin()+ pos+1, body.end());
 
-        size_t start_pos;
         std::string from = "\"\\\"";
         std::string to ="\\\"";
 
@@ -601,7 +600,6 @@ bool QQPlugin::send_group_message(const std::string & group_class, const std::st
         pos = body.find_last_of("}");
         body.erase(body.begin()+ pos+1, body.end());
 
-        size_t start_pos;
         std::string from = "\"\\\"";
         std::string to ="\\\"";
 

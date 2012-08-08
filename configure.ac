@@ -34,16 +34,16 @@ fi
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdint.h\
                                        stdlib.h string.h sys/ioctl.h sys/socket.h unistd.h zlib.h boost/shared_ptr.hpp boost/function.hpp])
 
-PKG_CHECK_MODULES(SQLITE3, [sqlite3 > 3.3], [
-            AC_DEFINE(USE_SQLITE3, 1, [Use sqlite3])
-            AC_SUBST(SQLITE3_CFLAGS)
-            AC_SUBST(SQLITE3_LIBS)] ,
-            [
-            echo ""
-            echo "configure: error: "
-            echo "libsqlite3 development headers not found."
-            echo ""
-            exit -1])
+dnl PKG_CHECK_MODULES(SQLITE3, [sqlite3 > 3.3], [
+dnl            AC_DEFINE(USE_SQLITE3, 1, [Use sqlite3])
+dnl            AC_SUBST(SQLITE3_CFLAGS)
+dnl            AC_SUBST(SQLITE3_LIBS)] ,
+dnl            [
+dnl            echo ""
+dnl            echo "configure: error: "
+dnl            echo "libsqlite3 development headers not found."
+dnl            echo ""
+dnl            exit -1])
             
 PKG_CHECK_MODULES(CURL, [libcurl >= 7.20],[
            AC_DEFINE(USE_CURL,1,[Use curl])

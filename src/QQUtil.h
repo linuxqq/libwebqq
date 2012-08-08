@@ -35,6 +35,6 @@ namespace QQUtil{
 
     int64_t currentTimeMillis();
 
-};
+}
 
 #endif
