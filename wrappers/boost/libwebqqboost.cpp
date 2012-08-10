@@ -16,6 +16,7 @@ using namespace boost::python;
 #include <vector>
 #include <map>
 #include <list>
+#include <utility>
 #include <iterator>
 #include <boost/python.hpp>
 #include <boost/python/enum.hpp>
@@ -149,7 +150,7 @@ BOOST_PYTHON_MODULE(libwebqqboost)
     class_<std::map<std::string , std::map<std::string , QQBuddy> > > ("map_group_contact")
         .def(boost::python::map_indexing_suite< std::map< std::string, std::map<std::string, QQBuddy> > >() );
 
-
+    to_python_converter<std::pair<QQEvent, std::string>, PairToTupleConverter<QQEvent, std::string> >();
 
     class_<ResourceManager, boost::noncopyable>("ResourceManager")
         .def(init<>())
