@@ -61,7 +61,7 @@ class QQPlugin: public Singleton<QQPlugin>
     static int message_id;
 
 public:
-
+    QQPlugin();
     virtual  ~QQPlugin();
 
 
@@ -91,8 +91,6 @@ public:
     //bool webqq_logout();
 
 private:
-
-    QQPlugin();
 
     void get_user_friends();
     void parse_user_friends(const Json::Value & value);

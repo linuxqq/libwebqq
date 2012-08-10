@@ -16,7 +16,7 @@ libwebqq_la_SOURCES= Thread.h Thread.cpp \
 		     QQTaskManager.h QQTaskManager.cpp\
    		     QQTypes.h
 
-AM_CXXFLAGS = -ggdb -O0  -Wall -D_REENTRANT  -Wall -Wno-long-long  -Wpacked -Wundef -Wchar-subscripts  -pedantic -ansi
+AM_CXXFLAGS = -fPIC -ggdb -O0  -Wall -D_REENTRANT  -Wall -Wno-long-long  -Wpacked -Wundef -Wchar-subscripts  -pedantic -ansi
 AM_LDFLAGS =
 
 

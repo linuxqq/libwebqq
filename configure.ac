@@ -91,12 +91,13 @@ if test "$enable_event_queue" == "yes" ; then
 fi
 
 AC_CONFIG_FILES([Makefile
-	 jsoncpp/Makefile
-	 jsoncpp/src/Makefile
-	 wrappers/Makefile
-	 wrappers/python/Makefile
-         src/Makefile
-         test/Makefile
+                jsoncpp/Makefile
+                jsoncpp/src/Makefile
+                src/Makefile
+	            wrappers/Makefile
+                wrappers/boost/Makefile
+	            wrappers/python/Makefile
+                test/Makefile
          ])
 AC_OUTPUT
 

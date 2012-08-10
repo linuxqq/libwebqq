@@ -3,6 +3,7 @@
 #define SWIG_FILE_WITH_INIT
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
+#include <HttpClient.h>
 #include <sstream>
 #include <stdio.h>
 #include <QQAction.h>
@@ -12,6 +13,7 @@
 #include <json/json.h>
 #include <QQEventQueue.h>
 #include <SmartPtr.h>
+#include <gssapi.h>
 class PyCallback
 {
     PyObject *func;
@@ -51,6 +53,7 @@ class PyCallback
 %include "QQEventQueue.h"
 %include "json/json.h"
 %include "SmartPtr.h"
+%include "HttpClient.h"
 
 %feature("director") Action;
 %pythonprepend Action::setAction %{
