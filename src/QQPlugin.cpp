@@ -630,3 +630,13 @@ bool QQPlugin::send_group_message(const std::string & group_class, const std::st
         return false;
     }
 }
+
+bool QQPlugin::send_buddy_nudge(const std::string & uin)
+{
+    bool success = false;
+
+    SendShake * job = new SendShake(uin, clientid, psessionid);
+    ThreadPool::run(job, & success, true);
+    ThreadPool::sync(job);
+    return success;
+}

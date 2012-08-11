@@ -408,6 +408,37 @@ void GetFace::run(void * ptr)
 
 }
 
+void SendShake::run(void *ptr)
+{
+    bool *success = reinterpret_cast<bool *>(ptr);
+    std::stringstream uri;
+    uri<<"http://d.web2.qq.com/channel/shake2?to_uin="
+       <<to_uin<<"&clientid="
+       <<client_id<<"&psessionid="<<psessionid
+       <<"&t="<<QQUtil::currentTimeMillis();
+
+    HttpClient request;
+    std::list<std::string> headers;
+    headers.clear();
+    headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=1&id=2");
+    request.setHttpHeaders(headers);
+    std::string result = request.requestServer(uri.str());
+
+    Json::Reader jsonReader;
+    Json::Value root;
+    jsonReader.parse(result, root, false);
+    int ret= root["retcode"].asInt();
+
+    if ( ret == 0 )
+    {
+        *success = true;
+    }
+    else
+    {
+        *success = false;
+    }
+}
+
 GetMiscInfo::GetMiscInfo(const std::string &vfwebqq)
 {
     this->vfwebqq = vfwebqq;
@@ -533,6 +564,23 @@ void Poll2::run( void * ptr)
                     if ( res->event_adapter.is_event_registered (ON_GROUP_MESSAGE))
                     {
                         res->event_adapter.trigger(ON_GROUP_MESSAGE ,value);
+                    }
+                    else
+                    {
+#ifndef USE_EVENT_QUEUE
+                        debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+#endif
+                    }
+                }
+                else if (poll_type == "shake_message")
+                {
+#ifdef USE_EVENT_QUEUE
+                    res->event_queue.push(std::make_pair<QQEvent, std::string>( ON_SHAKE_MESSAGE , value));
+#endif
+
+                    if ( res->event_adapter.is_event_registered (ON_SHAKE_MESSAGE))
+                    {
+                        res->event_adapter.trigger(ON_SHAKE_MESSAGE ,value);
                     }
                     else
                     {

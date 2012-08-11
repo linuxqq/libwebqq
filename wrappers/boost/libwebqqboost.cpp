@@ -166,6 +166,7 @@ BOOST_PYTHON_MODULE(libwebqqboost)
         .def("webqq_login", &QQPlugin::webqq_login)
         .def("send_buddy_message", &QQPlugin::send_buddy_message)
         .def("send_group_message", &QQPlugin::send_group_message)
+        .def("send_buddy_nudge", &QQPlugin::send_buddy_nudge)
         ;
 
     class_<SingletonInstance, boost::noncopyable> ("SingletonInstance")

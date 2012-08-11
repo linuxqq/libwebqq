@@ -86,6 +86,8 @@ public:
 
     bool send_group_message( const std::string & group_class , const std::string & message_body);
 
+    bool send_buddy_nudge( const std::string & uin);
+
     //bool send_group_message(const std::string & uin, const std::string & message_body);
 
     //bool webqq_logout();

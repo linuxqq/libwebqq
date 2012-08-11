@@ -49,6 +49,19 @@ public:
     virtual void run( void *);
 };
 
+class SendShake:public ThreadPool::TPool::TJob
+{
+    std::string to_uin;
+    std::string client_id;
+    std::string psessionid;
+public:
+    SendShake(const std::string & uin_,
+              const std::string & client_id_,
+              const std::string & psessionid_ ):
+        to_uin(uin_), client_id(client_id_), psessionid(psessionid_)
+    {}
+    virtual void run( void *);
+};
 
 class GetGroupInfo: public ThreadPool::TPool::TJob, public QQTask
 {
