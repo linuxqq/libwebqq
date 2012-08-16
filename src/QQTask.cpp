@@ -187,10 +187,10 @@ void GetFriendsInfo2::run( void * ptr)
             res->contacts[uin].shengxiao = root["result"]["shengxiao"].asInt();
             res->contacts[uin].mobile= writer.write( root["result"]["mobile"]);
 
-#ifdef USE_EVENT_QUEUE
             Json::Value json_result ;
             json_result["uin"] = uin;
             json_result["nick"] = nick;
+#ifdef USE_EVENT_QUEUE
             res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_NICK_CHANGE, writer.write(json_result)));
 #endif
             if ( res->event_adapter.is_event_registered ( ON_NICK_CHANGE ))

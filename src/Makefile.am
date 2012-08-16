@@ -1,6 +1,6 @@
 lib_LTLIBRARIES=libwebqq.la
-libwebqq_la_CPPFLAGS=-I../jsoncpp/include $(CURL_CFLAGS) $(CFLAGS)
-libwebqq_la_LIBADD=$(CURL_LIBS) -L../jsoncpp/src/ -ljsoncpp
+libwebqq_la_CPPFLAGS=-I../jsoncpp/include $(CURL_CFLAGS) $(CXXFLAGS)
+libwebqq_la_LIBADD=$(CURL_LIBS) ../jsoncpp/src/libjsoncpp.a 
 libwebqq_la_SOURCES= Thread.h Thread.cpp \
 		     ThreadPool.h ThreadPool.cpp\
 		     Singleton.h \
@@ -16,7 +16,7 @@ libwebqq_la_SOURCES= Thread.h Thread.cpp \
 		     QQTaskManager.h QQTaskManager.cpp\
    		     QQTypes.h
 
-AM_CXXFLAGS = -fPIC -ggdb -O0  -Wall -D_REENTRANT  -Wall -Wno-long-long  -Wpacked -Wundef -Wchar-subscripts  -pedantic -ansi
-AM_LDFLAGS =
+AM_CXXFLAGS = -fPIC -ggdb -O0  -Wall -D_REENTRANT  -Wall -Wno-long-long  -Wpacked -Wundef -Wchar-subscripts  -pedantic -ansi 
+AM_LDFLAGS =  
 
 

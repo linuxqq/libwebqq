@@ -122,12 +122,12 @@ AC_FUNC_MALLOC
 AC_CHECK_FUNCS([bzero gethostbyname memset mkdir select socket strstr strtol])
 AC_CHECK_FUNCS([inet_ntoa])
 
-#Set build CFLAGS
+#Set build CXXFLAGS
 
 AC_ARG_ENABLE([use-event-queue],
 	[AS_HELP_STRING([--enable-use-event-queue],[Use event queue for communication between interface and back end daemon])], enable_event_queue="$enableval" , enable_event_queue="yes" )
 if test "$enable_event_queue" == "yes" ; then
-	CFLAGS="$CFLAGS -DUSE_EVENT_QUEUE" 
+	CXXFLAGS="$CXXFLAGS -DUSE_EVENT_QUEUE" 
 fi
 
 AC_CONFIG_FILES([Makefile
@@ -142,5 +142,5 @@ AC_OUTPUT
 
 
 echo ============================== OPTIONS ==============================
-echo Build CFLAGS: $CFLAGS
+echo Build CXXFLAGS: $CXXFLAGS
 echo =====================================================================
