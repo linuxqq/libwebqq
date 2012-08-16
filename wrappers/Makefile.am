@@ -1,1 +1,1 @@
-SUBDIRS=python boost
+SUBDIRS=boost
