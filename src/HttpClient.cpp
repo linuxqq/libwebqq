@@ -127,6 +127,8 @@ void HttpClient::perform()
     do
     {
         ret = curl_easy_setopt(request, CURLOPT_VERBOSE, 0);
+        ret = curl_easy_setopt(request, CURLOPT_ENCODING, "gzip");
+
         if(request==NULL)
         {
             std::cerr<<"Invalid Http Client"<<std::endl;
