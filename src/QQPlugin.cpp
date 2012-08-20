@@ -135,12 +135,11 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
         if ( 0 == retcode)
         {
             get_user_friends();
-            ThreadPool::sync_all();
             get_online_buddies();
+            //get_group_name_list();
             get_group_info();
             ThreadPool::sync_all();
             debug_info("Login Sucess ... (%s,%d)", __FILE__, __LINE__);
-
             GetMiscInfo *get_misc_info = new GetMiscInfo(vfwebqq);
             ThreadPool::run(get_misc_info, res, true);
 
@@ -152,6 +151,8 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
 
             Poll2 * poll = new Poll2(body );
             ThreadPool::run(poll, res, true);
+
+            return true;
 
         }
         else
