@@ -136,9 +136,9 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
         {
             get_user_friends();
             get_online_buddies();
-            //get_group_name_list();
+            get_group_name_list();
             get_group_info();
-            ThreadPool::sync_all();
+            //ThreadPool::sync_all();
             debug_info("Login Sucess ... (%s,%d)", __FILE__, __LINE__);
             GetMiscInfo *get_misc_info = new GetMiscInfo(vfwebqq);
             ThreadPool::run(get_misc_info, res, true);
@@ -302,7 +302,8 @@ void QQPlugin::get_group_name_list()
             for( Json::Value::iterator it = gnamelist.begin();  it != gnamelist.end(); it ++)
             {
                 QQGroup group;
-                group.name = writer.write((*it)["name"]);
+                group.name = QQUtil::trim(writer.write((*it)["name"]));
+                QQUtil::replaceAll(group.name,"\"","");
                 group.gid = QQUtil::trim(writer.write((*it)["gid"]));
                 group.flag = writer.write((*it)["flag"]);
                 group.code = QQUtil::trim(writer.write((*it)["code"]));
@@ -380,7 +381,7 @@ void QQPlugin::get_online_buddies()
 void QQPlugin::get_group_info()
 {
     debug_info("Get Group Info ... (%s,%d)", __FILE__, __LINE__);
-    get_group_name_list();
+    //get_group_name_list();
     if ( res->groups.empty())
     {
         debug_error("Empty Group list!");
