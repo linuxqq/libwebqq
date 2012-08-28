@@ -88,6 +88,31 @@ public:
     virtual void run(void *);
 };
 
+class SetLongNick : public ThreadPool::TPool::TJob, public QQTask
+{
+    std::string lnick;
+public :
+    SetLongNick(const std::string &uin, const std::string & vfwebqq, const std::string & lnick);
+    virtual void run(void *);
+};
+
+class ChangeStatus : public ThreadPool::TPool::TJob
+{
+    std::string status;
+    std::string clientid;
+    std::string psessionid;
+
+public:
+
+    ChangeStatus(const std::string & status_ ,
+                 const std::string & clientid_,
+                 const std::string & psessionid_):
+        status(status_), clientid(clientid_), psessionid(psessionid_)
+    {}
+
+    virtual void run(void *ptr);
+};
+
 class Poll2:public ThreadPool::TPool::TJob
 {
     std::string body;

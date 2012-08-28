@@ -432,10 +432,12 @@ void SendShake::run(void *ptr)
     if ( ret == 0 )
     {
         *success = true;
+        debug_info("Success to send shake request ... (%s,%d)", __FILE__, __LINE__);
     }
     else
     {
         *success = false;
+        debug_error("Fail to send shake request ... (%s,%d)", __FILE__, __LINE__);
     }
 }
 
@@ -476,6 +478,85 @@ void GetMiscInfo::run(void * ptr)
         GetFace *get_group_face = new GetFace(it->first, vfwebqq, 4);
         ThreadPool::run(get_group_face, res, true);
     }
+}
+
+SetLongNick::SetLongNick(const std::string & uin ,
+                         const std::string & vfwebqq,
+                         const std::string & nick):QQTask(uin, vfwebqq)
+{
+    lnick = nick;
+}
+
+void SetLongNick::run(void *ptr)
+{
+    bool * success = reinterpret_cast <bool *> (ptr);
+
+    HttpClient client;
+    std::list<std::string> headers;
+    headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
+    client.setHttpHeaders(headers);
+
+    Json::Reader jsonReader;
+    Json::FastWriter writer;
+    Json::Value root;
+    root["nlk"] = lnick;
+    root["vfwebqq"] = vfwebqq;
+
+
+    std::string body = "r=" + QQUtil::urlencode(QQUtil::trim(writer.write(root)));
+
+    std::string result = client.requestServer("http://s.web2.qq.com/api/set_long_nick2",
+                                              body);
+
+    jsonReader.parse(result, root, false);
+    int ret = root["retcode"].asInt();
+
+    if (ret == 0)
+    {
+        *success = true;
+        debug_info("Success to set self long nick! ... (%s,%d)",
+                   __FILE__, __LINE__);
+    }
+    else
+    {
+        *success = false;
+        debug_error("Fail to set self long nick! ... (%s,%d)",
+                    __FILE__, __LINE__);
+    }
+
+}
+
+void ChangeStatus::run(void * ptr)
+{
+    bool *success = reinterpret_cast<bool *>(ptr);
+    std::stringstream uri;
+    uri<<"http://d.web2.qq.com/channel/change_status2?newstatus="
+       <<status<<"&clientid="
+       <<clientid<<"&psessionid="<<psessionid
+       <<"&t="<<QQUtil::currentTimeMillis();
+
+    HttpClient client;
+    std::list<std::string> headers;
+    headers.push_back("Referer: http://d.web2.qq.com/proxy.html?v=20110331002&callback=1&id=3");
+    client.setHttpHeaders(headers);
+    std::string result = client.requestServer(uri.str());
+
+    Json::Reader jsonReader;
+    Json::Value root;
+    jsonReader.parse(result, root, false);
+    int ret = root["retcode"].asInt();
+    if ( ret == 0)
+    {
+        *success = true;
+        debug_info("Success to change QQ Status as %s! ... (%s,%d)", status.c_str(),
+                   __FILE__, __LINE__);
+    }
+    else
+    {
+        *success = false;
+        debug_error("Fail to change QQ Status !... (%s,%d)" , __FILE__, __LINE__);
+    }
+
 }
 
 Poll2::Poll2(const std::string & data)

@@ -62,7 +62,6 @@ QQPlugin::~QQPlugin()
 bool QQPlugin::webqq_login(const std::string & user, const std::string & password, const std::string & status)
 {
 
-    QQBuddy me;
     me.uin = user;
     me.status = status;
     me.cate_index = 0;
@@ -641,4 +640,24 @@ bool QQPlugin::send_buddy_nudge(const std::string & uin)
     ThreadPool::run(job, & success, true);
     ThreadPool::sync(job);
     return success;
+}
+
+bool QQPlugin::set_long_nick(const std::string & nick)
+{
+    bool success = false;
+    SetLongNick * job = new SetLongNick(me.uin , vfwebqq, nick);
+    ThreadPool::run(job, & success, true);
+    ThreadPool::sync(job);
+    return success;
+}
+
+
+bool QQPlugin::change_status(const std::string & status)
+{
+    bool success = false;
+    ChangeStatus * job = new ChangeStatus(status, clientid, psessionid);
+    ThreadPool::run(job, & success, true);
+    ThreadPool::sync(job);
+    return success;
+
 }

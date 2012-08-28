@@ -53,6 +53,8 @@ class QQPlugin: public Singleton<QQPlugin>
 {
 
     friend class Singleton<QQPlugin>;
+
+    QQBuddy me;
     std::string vfwebqq;
     std::string clientid;
     std::string psessionid;
@@ -89,6 +91,9 @@ public:
     bool send_buddy_nudge( const std::string & uin);
 
     //bool send_group_message(const std::string & uin, const std::string & message_body);
+
+    bool set_long_nick( const std::string & nick);
+    bool change_status( const std::string & status);
 
     //bool webqq_logout();
 
