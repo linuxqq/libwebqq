@@ -54,6 +54,7 @@ QQPlugin::QQPlugin()
 
 QQPlugin::~QQPlugin()
 {
+
     ThreadPool::sync_all();
     ThreadPool::done();
     delete res;
@@ -137,19 +138,20 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
             get_online_buddies();
             get_group_name_list();
             get_group_info();
-            //ThreadPool::sync_all();
-            debug_info("Login Sucess ... (%s,%d)", __FILE__, __LINE__);
+
             GetMiscInfo *get_misc_info = new GetMiscInfo(vfwebqq);
             ThreadPool::run(get_misc_info, res, true);
 
-            std::string body ="r=%7B%22clientid%22%3A%22"+clientid+    \
-                              "%22%2C%22psessionid%22%3A%22"+psessionid\
-                              +"%22%2C%22key%22%3A0%2C%22ids%22%3A%5B%5D%7D&clientid="+\
+            std::string body ="r=%7B%22clientid%22%3A%22"+clientid+ \
+                              "%22%2C%22psessionid%22%3A%22"+psessionid \
+                              +"%22%2C%22key%22%3A0%2C%22ids%22%3A%5B%5D%7D&clientid="+ \
                               clientid+"&psessionid="+ psessionid;
 
 
             Poll2 * poll = new Poll2(body );
             ThreadPool::run(poll, res, true);
+
+            debug_info("Login Sucess ... (%s,%d)", __FILE__, __LINE__);
 
             return true;
 
@@ -439,7 +441,7 @@ QQPlugin::SendGroupMessage::SendGroupMessage(const std::string & body )
 
 void QQPlugin::SendGroupMessage::run( void *ptr)
 {
-     bool  *success =  (bool*)(ptr);
+    bool  *success =  (bool*)(ptr);
     HttpClient * client;
     client = new HttpClient();
     std::list<std::string> headers;

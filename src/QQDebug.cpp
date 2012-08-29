@@ -2,10 +2,10 @@
  * @file   qq_debug.c
  * @author Xiang Wang <xiang_wang@trendmicro.com.cn>
  * @date   Sun May 13 22:13:19 2012
- * 
- * @brief  
- * 
- * 
+ *
+ * @brief
+ *
+ *
  */
 
 #include "QQDebug.h"
@@ -31,6 +31,7 @@ void debug_info(const char* format , ...)
         va_start(ap, format);
         vfprintf(stdout , fmt , ap);
         va_end(ap);
+        fflush(NULL);
 }
 void debug_error(const char* format , ...)
 {
@@ -40,4 +41,5 @@ void debug_error(const char* format , ...)
         va_start(ap, format);
         vfprintf(stderr , fmt , ap);
         va_end(ap);
+        fflush(NULL);
 }

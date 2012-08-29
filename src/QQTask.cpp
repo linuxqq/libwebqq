@@ -449,14 +449,7 @@ GetMiscInfo::GetMiscInfo(const std::string &vfwebqq)
 void GetMiscInfo::run(void * ptr)
 {
     ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
-    /*
-    for ( std::map<std::string, QQGroup>::iterator it = res->groups.begin();
-          it != res->groups.end(); it++)
-    {
-        GetFace *get_group_face = new GetFace(it->first, vfwebqq, 4);
-        ThreadPool::run(get_group_face, res, true);
-    }
-    */
+
     int count =0;
     for ( std::map<std::string , QQBuddy>::iterator it = res->contacts.begin();
           it != res->contacts.end(); it ++, count ++ )
@@ -478,6 +471,7 @@ void GetMiscInfo::run(void * ptr)
         GetFace *get_group_face = new GetFace(it->first, vfwebqq, 4);
         ThreadPool::run(get_group_face, res, true);
     }
+
 }
 
 SetLongNick::SetLongNick(const std::string & uin ,
