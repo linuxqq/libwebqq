@@ -44,7 +44,7 @@ Boost and Swig are both wrappers for libwebqq . It depends on the programming la
 ## Extensions
 As a featured request, I have finished emesene extension . Next generation of emesene will support web qq session soon. Emesene is a wildly used instance message client. Here are some important component for your extension project.
 
-## Boost or Swig
+### Boost or Swig
 Both Boost-Python and Swig are excellent method for python C++ extensions. Use Boost python or swig is depends on your project that extends libwebqq.
 
 If you use C++ family language -- QT, swig is better . You can define call back class structure implements Action Class.
