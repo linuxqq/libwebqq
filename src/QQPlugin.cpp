@@ -46,7 +46,7 @@ void ResourceManager::ulock()
 
 QQPlugin::QQPlugin()
 {
-    ThreadPool::init(8);
+    ThreadPool::init(4);
     res = Singleton<ResourceManager>::getInstance();
 
     clientid="98403775";
@@ -303,11 +303,13 @@ void QQPlugin::get_group_name_list()
             for( Json::Value::iterator it = gnamelist.begin();  it != gnamelist.end(); it ++)
             {
                 QQGroup group;
+                group.code = QQUtil::trim(writer.write((*it)["code"]));
+                if ( group.code == "null")
+                    continue;
                 group.name = QQUtil::trim(writer.write((*it)["name"]));
                 QQUtil::replaceAll(group.name,"\"","");
                 group.gid = QQUtil::trim(writer.write((*it)["gid"]));
                 group.flag = writer.write((*it)["flag"]);
-                group.code = QQUtil::trim(writer.write((*it)["code"]));
                 res->groups[group.code]= group;
             }
             if ( res->groups.empty())
@@ -382,7 +384,7 @@ void QQPlugin::get_online_buddies()
 void QQPlugin::get_group_info()
 {
     debug_info("Get Group Info ... (%s,%d)", __FILE__, __LINE__);
-    //get_group_name_list();
+  
     if ( res->groups.empty())
     {
         debug_error("Empty Group list!");
@@ -624,7 +626,7 @@ bool QQPlugin::send_group_message(const std::string & group_class, const std::st
         SendGroupMessage * job= new SendGroupMessage( body);
 
         ThreadPool::run(job, &sucess, true);
-        ThreadPool::sync(job);
+        //ThreadPool::sync(job);
         return sucess;
 
     }catch(...)
@@ -640,7 +642,7 @@ bool QQPlugin::send_buddy_nudge(const std::string & uin)
 
     SendShake * job = new SendShake(uin, clientid, psessionid);
     ThreadPool::run(job, & success, true);
-    ThreadPool::sync(job);
+    //ThreadPool::sync(job);
     return success;
 }
 
@@ -649,7 +651,7 @@ bool QQPlugin::set_long_nick(const std::string & nick)
     bool success = false;
     SetLongNick * job = new SetLongNick(me.uin , vfwebqq, nick);
     ThreadPool::run(job, & success, true);
-    ThreadPool::sync(job);
+    //ThreadPool::sync(job);
     return success;
 }
 
@@ -659,7 +661,7 @@ bool QQPlugin::change_status(const std::string & status)
     bool success = false;
     ChangeStatus * job = new ChangeStatus(status, clientid, psessionid);
     ThreadPool::run(job, & success, true);
-    ThreadPool::sync(job);
+    //ThreadPool::sync(job);
     return success;
 
 }

@@ -340,9 +340,9 @@ void GetGroupInfo::run( void *ptr)
                 break;
             }
             else{
-                debug_error("Get Group member list fail ... (%s,%d)", __FILE__, __LINE__ );
-                sleep(5);
-                debug_info("Retry to get group memeber list ... (%s,%d)", __FILE__, __LINE__);
+	      debug_error("Get Group member %s list fail ... (%s,%d)", gcode.c_str() ,  __FILE__, __LINE__ );
+                sleep(20);
+                debug_info("Retry to get group %s memeber list ... (%s,%d)",gcode.c_str(),  __FILE__, __LINE__);
             }
         }catch(...)
         {
