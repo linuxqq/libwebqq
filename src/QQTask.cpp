@@ -42,7 +42,7 @@ void GetLongNick::run(void *ptr)
 
     HttpClient *request = new HttpClient();
     std::string uri = "http://s.web2.qq.com/api/get_single_long_nick2?tuin="+\
-                      temp_uin + "&vfwebqq="+ vfwebqq;
+        temp_uin + "&vfwebqq="+ vfwebqq;
 
     std::list<std::string> headers;
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
@@ -95,8 +95,8 @@ void GetFriendUin::run( void * ptr)
 
     HttpClient *request = new HttpClient();
     std::string uri = "http://s.web2.qq.com/api/get_friend_uin2?tuin="+\
-                      temp_uin + "&verifysession=&type=1&code=&vfwebqq="+\
-                      vfwebqq;
+        temp_uin + "&verifysession=&type=1&code=&vfwebqq="+\
+        vfwebqq;
 
     std::list<std::string> headers;
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=1");
@@ -144,7 +144,7 @@ void GetFriendsInfo2::run( void * ptr)
 
     HttpClient *request = new HttpClient();
     std::string uri = "http://s.web2.qq.com/api/get_friend_info2?tuin="+\
-                      temp_uin + "&vfwebqq="+ vfwebqq;
+        temp_uin + "&vfwebqq="+ vfwebqq;
 
     std::list<std::string> headers;
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
@@ -194,9 +194,9 @@ void GetFriendsInfo2::run( void * ptr)
             res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_NICK_CHANGE, writer.write(json_result)));
 #endif
             if ( res->event_adapter.is_event_registered ( ON_NICK_CHANGE ))
-             {
-                 res->event_adapter.trigger(ON_NICK_CHANGE ,writer.write(json_result));
-             }
+            {
+                res->event_adapter.trigger(ON_NICK_CHANGE ,writer.write(json_result));
+            }
             else
             {
 #ifndef USE_EVENT_QUEUE
@@ -230,8 +230,8 @@ void GetGroupInfo::run( void *ptr)
 
     HttpClient *request = new HttpClient();
     std::string uri = "http://s.web2.qq.com/api/get_group_info?gcode=%5B"+
-                      gcode+"%5D&retainKey=memo%2Cgcode&vfwebqq="+vfwebqq + \
-                      "&t=1339476483796";
+        gcode+"%5D&retainKey=memo%2Cgcode&vfwebqq="+vfwebqq + \
+        "&t=1339476483796";
 
     std::list<std::string> headers;
     headers.push_back("Referer: http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3");
@@ -265,7 +265,7 @@ void GetGroupInfo::run( void *ptr)
     {
 
         uri = "http://s.web2.qq.com/api/get_group_info_ext2?gcode="+\
-              gcode+ "&vfwebqq="+ vfwebqq+"&t=1339476485660";
+            gcode+ "&vfwebqq="+ vfwebqq+"&t=1339476485660";
 
         request = new HttpClient();
         headers.clear();
@@ -340,7 +340,7 @@ void GetGroupInfo::run( void *ptr)
                 break;
             }
             else{
-	      debug_error("Get Group member %s list fail ... (%s,%d)", gcode.c_str() ,  __FILE__, __LINE__ );
+                debug_error("Get Group member %s list fail ... (%s,%d)", gcode.c_str() ,  __FILE__, __LINE__ );
                 sleep(20);
                 debug_info("Retry to get group %s memeber list ... (%s,%d)",gcode.c_str(),  __FILE__, __LINE__);
             }
@@ -362,49 +362,49 @@ GetFace::GetFace(const std::string & uin, const std::string & vfwebqq, int type_
 
 void GetFace::run(void * ptr)
 {
-     ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
-     std::stringstream uri ;
+    ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
+    std::stringstream uri ;
 
-     std::list<std::string> cookies = (Singleton<HttpClient>::getInstance())->dumpCookies();
+    std::list<std::string> cookies = (Singleton<HttpClient>::getInstance())->dumpCookies();
 
-     uri<< "http://"<< "face"<<host_number<<".qun.qq.com"
-        << "/cgi/svr/face/getface?cache=0&type="<<type<<"&fid=0&uin="<<uin<<"&vfwebqq="<<vfwebqq;
+    uri<< "http://"<< "face"<<host_number<<".qun.qq.com"
+       << "/cgi/svr/face/getface?cache=0&type="<<type<<"&fid=0&uin="<<uin<<"&vfwebqq="<<vfwebqq;
 
-     host_number = host_number % 10 +1;
-     HttpClient *request = new HttpClient(cookies);
-     std::list<std::string> headers;
-     headers.clear();
-     headers.push_back("Referer: http://web.qq.com/");
+    host_number = host_number % 10 +1;
+    HttpClient *request = new HttpClient(cookies);
+    std::list<std::string> headers;
+    headers.clear();
+    headers.push_back("Referer: http://web.qq.com/");
 
-     request->setHttpHeaders(headers);
+    request->setHttpHeaders(headers);
 
-     std::string result = request->requestServer(uri.str());
+    std::string result = request->requestServer(uri.str());
 
-     delete request;
-     res->lock();
-     if ( res->contacts.count(uin) != 0 || res->groups.count(uin) !=0 )
-     {
-         res->contacts[uin].face = result;
+    delete request;
+    res->lock();
+    if ( res->contacts.count(uin) != 0 || res->groups.count(uin) !=0 )
+    {
+        res->contacts[uin].face = result;
 #ifdef USE_EVENT_QUEUE
-         res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_AVATAR_UPDATE, uin));
+        res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_AVATAR_UPDATE, uin));
 
 #endif
-         if ( res->event_adapter.is_event_registered (ON_AVATAR_UPDATE))
-         {
-             res->event_adapter.trigger( ON_AVATAR_UPDATE,uin);
-         }
-         else
-         {
+        if ( res->event_adapter.is_event_registered (ON_AVATAR_UPDATE))
+        {
+            res->event_adapter.trigger( ON_AVATAR_UPDATE,uin);
+        }
+        else
+        {
 #ifndef USE_EVENT_QUEUE
-             debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
+            debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
 #endif
-         }
-     }
-     else
-     {
-         debug_error("Invaid contact uin ... (%s,%d)", __FILE__, __LINE__);
-     }
-     res->ulock();
+        }
+    }
+    else
+    {
+        debug_error("Invaid contact uin ... (%s,%d)", __FILE__, __LINE__);
+    }
+    res->ulock();
 
 }
 
@@ -553,9 +553,54 @@ void ChangeStatus::run(void * ptr)
 
 }
 
-Poll2::Poll2(const std::string & data)
+GetOffPic::GetOffPic(const std::string & from_uin_, const std::string & file_path_, 
+                     const std::string & clientid_, const std::string & pessionid_)
+{
+    this->from_uin = from_uin_;
+    this->file_path = file_path_;
+    this->clientid = clientid_;
+    this->psessionid = pessionid_;
+}
+
+void GetOffPic::run(void * ptr)
+{
+    ResourceManager * res  = reinterpret_cast<ResourceManager *> (ptr);
+
+    std::list<std::string> cookies = (Singleton<HttpClient>::getInstance())->dumpCookies();
+    HttpClient * client = NULL;
+    client = new HttpClient(cookies);
+    std::list<std::string> headers;
+    headers.push_back("Referer: http://web.qq.com/");
+    client->setHttpHeaders(headers);
+    std::stringstream uri ;
+    uri <<"http://d.web2.qq.com/channel/get_offpic2?file_path="
+        << QQUtil::urlencode(file_path)
+        <<"&f_uin="<<from_uin
+        <<"&clientid="<<clientid 
+        <<"&psessionid="<< psessionid;
+
+    std::string pic = client->requestServer(uri.str());
+
+    delete client;
+
+#ifdef USE_EVENT_QUEUE
+    res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_BUDDY_PIC_MESSAGE, pic));
+#endif
+    if ( res->event_adapter.is_event_registered(ON_BUDDY_PIC_MESSAGE) )
+    {
+        res->event_adapter.trigger(ON_BUDDY_PIC_MESSAGE ,pic);
+    }
+
+}
+
+
+Poll2::Poll2(const std::string & data,
+             const std::string & clientid_,
+             const std::string & psessionid_)
 {
     this->body = data;
+    this->clientid = clientid_;
+    this->psessionid = psessionid_;
 }
 
 void Poll2::run( void * ptr)
@@ -597,21 +642,47 @@ void Poll2::run( void * ptr)
                 std::string value = QQUtil::trim(writer.write((*iter)["value"]));
 
                 std::string poll_type  = (*iter)["poll_type"].asString();
+                
                 if ( poll_type == "message")
                 {
+                    
+                    Json::Value data = (*iter)["value"]["content"];
+                                        
+                    for ( int index = 0 ; index < data.size(); ++ index )
+                    {
+                        Json::ValueType value_type = data[index].type();
+                        
+                        if ( value_type == Json::arrayValue )
+                        {
+                            if ( data[index][0].asString() == "font")
+                            {
+                                continue;
+                            }
+                            else if ( data[index][0].asString() == "offpic")
+                            {
+                                std::string from_uin = QQUtil::trim(writer.write((*iter)["value"]["from_uin"]));
+                                std::string file_path = data[index][1]["file_path"].asString();
+                                GetOffPic *off_pic =  new GetOffPic(from_uin, file_path, clientid, psessionid);
+                                ThreadPool::run(off_pic, ptr, true);
+                            }
+                        }
+                        else if (value_type == Json::stringValue )
+                        {
 #ifdef USE_EVENT_QUEUE
-                    res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_BUDDY_MESSAGE, value));
+                            res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_BUDDY_MESSAGE,data[index].asString()));
 #endif
-                    if ( res->event_adapter.is_event_registered(ON_BUDDY_MESSAGE) )
-                    {
-                        res->event_adapter.trigger(ON_BUDDY_MESSAGE ,value);
+                            if ( res->event_adapter.is_event_registered(ON_BUDDY_MESSAGE) )
+                            {
+                                res->event_adapter.trigger(ON_BUDDY_MESSAGE ,data[index].asString());
+                            }
+                        }
+                        else
+                        {
+                            debug_error("Invalid data format... (%s,%d)", __FILE__, __LINE__);
+                        }
+                                                
                     }
-                    else
-                    {
-#ifndef USE_EVENT_QUEUE
-                        debug_info( " No on message event adapter loaded. (%s,%d)", __FILE__, __LINE__);
-#endif
-                    }
+                    
                 }
 
                 else if (poll_type == "buddies_status_change")

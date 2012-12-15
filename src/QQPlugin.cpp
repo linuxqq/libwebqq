@@ -148,7 +148,7 @@ bool QQPlugin::webqq_login(const std::string & user, const std::string & passwor
                               clientid+"&psessionid="+ psessionid;
 
 
-            Poll2 * poll = new Poll2(body );
+            Poll2 * poll = new Poll2(body , clientid, psessionid);
             ThreadPool::run(poll, res, true);
 
             debug_info("Login Sucess ... (%s,%d)", __FILE__, __LINE__);

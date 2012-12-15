@@ -25,6 +25,9 @@
 #include "ThreadPool.h"
 #include "QQEventQueue.h"
 
+
+#define USE_EVENT_QUEUE 1
+
 struct ResourceManager:Singleton<ResourceManager>
 {
 

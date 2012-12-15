@@ -59,7 +59,7 @@ public:
               const std::string & client_id_,
               const std::string & psessionid_ ):
         to_uin(uin_), client_id(client_id_), psessionid(psessionid_)
-    {}
+        {}
     virtual void run( void *);
 };
 
@@ -101,25 +101,45 @@ class ChangeStatus : public ThreadPool::TPool::TJob
     std::string status;
     std::string clientid;
     std::string psessionid;
-
+    
 public:
-
+    
     ChangeStatus(const std::string & status_ ,
                  const std::string & clientid_,
                  const std::string & psessionid_):
         status(status_), clientid(clientid_), psessionid(psessionid_)
-    {}
+        {}
 
     virtual void run(void *ptr);
 };
 
+class GetOffPic: public ThreadPool::TPool::TJob
+{
+    std::string from_uin;
+    std::string file_path;
+    std::string clientid;
+    std::string psessionid;
+    
+public:
+    GetOffPic( const std::string & from_uin_, 
+               const std::string & file_path_,
+               const std::string & clientid_, 
+               const std::string & psessionid_);
+    virtual void run(void * ptr);
+
+};
+
+
 class Poll2:public ThreadPool::TPool::TJob
 {
     std::string body;
-
+    std::string clientid;
+    std::string psessionid;
+    
 public:
 
-    Poll2(const std::string & data);
+    Poll2(const std::string & data, const std::string & clientid_, 
+          const std::string & psessionid_);
     virtual void run(void *);
 };
 #endif
