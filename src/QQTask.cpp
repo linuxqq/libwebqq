@@ -582,13 +582,19 @@ void GetOffPic::run(void * ptr)
     std::string pic = client->requestServer(uri.str());
 
     delete client;
-
+    Json::Value data;
+    data["from_uin"] = from_uin;
+    data["off_pic"] = pic;
+    
+    Json::FastWriter writer;
+    std::string value = writer.write(data);
+    
 #ifdef USE_EVENT_QUEUE
-    res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_BUDDY_PIC_MESSAGE, pic));
+    res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_BUDDY_PIC_MESSAGE, value));
 #endif
     if ( res->event_adapter.is_event_registered(ON_BUDDY_PIC_MESSAGE) )
     {
-        res->event_adapter.trigger(ON_BUDDY_PIC_MESSAGE ,pic);
+        res->event_adapter.trigger(ON_BUDDY_PIC_MESSAGE ,value);
     }
 
 }
@@ -668,12 +674,16 @@ void Poll2::run( void * ptr)
                         }
                         else if (value_type == Json::stringValue )
                         {
+                            Json::Value msg ;
+                            msg["from_uin"] = QQUtil::trim(writer.write((*iter)["value"]["from_uin"]));
+                            msg["message"] = data[index].asString();
+                            std::string message = writer.write(msg);
 #ifdef USE_EVENT_QUEUE
-                            res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_BUDDY_MESSAGE,data[index].asString()));
+                            res->event_queue.push(std::make_pair<QQEvent, std::string>(ON_BUDDY_MESSAGE, message));
 #endif
                             if ( res->event_adapter.is_event_registered(ON_BUDDY_MESSAGE) )
                             {
-                                res->event_adapter.trigger(ON_BUDDY_MESSAGE ,data[index].asString());
+                                res->event_adapter.trigger(ON_BUDDY_MESSAGE ,message);
                             }
                         }
                         else
